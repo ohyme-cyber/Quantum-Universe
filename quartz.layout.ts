@@ -15,14 +15,13 @@ export const sharedPageComponents: SharedLayout = {
 }
 
 // components for pages that display a single page (e.g. a single note)
+// 1. 在 defaultContentPageLayout 中修改
 export const defaultContentPageLayout: PageLayout = {
-beforeBody: [
+  beforeBody: [
     Component.Breadcrumbs(),
     Component.ArticleTitle(),
-    // 1. 将 ContentMeta 还原为不带参数的形式，或者删除它
-    Component.ContentMeta(), 
-    // 2. 专门添加 TagList 组件，这会处理标签的显示和点击跳转
-    Component.TagList(), 
+    Component.ContentMeta(),
+    Component.TagList(), // 这会显示当前文章的标签，点击可跳转
   ],
   left: [
     Component.PageTitle(),
@@ -30,22 +29,26 @@ beforeBody: [
     Component.Flex({
       components: [
         {
-          Component: Component.Search(),
+          Component: Component.Search(), // 这里就是你要求的高级检索，支持题目和全文
           grow: true,
         },
         { Component: Component.Darkmode() },
         { Component: Component.ReaderMode() },
       ],
     }),
-    Component.Explorer(),
+    // 添加这个组件来实现左侧“按日期排序”的目录
+    Component.RecentNotes({
+      title: "Recently",
+      limit: 20,        // 显示最近的10篇文章
+      showTags: false,  // 侧边栏可以不显示标签以保持简洁
+    }),
   ],
   right: [
     Component.Graph(),
-    Component.DesktopOnly(Component.TableOfContents()),
+    Component.TableOfContents(),
     Component.Backlinks(),
   ],
 }
-
 // components for pages that display lists of pages  (e.g. tags or folders)
 export const defaultListPageLayout: PageLayout = {
   beforeBody: [Component.Breadcrumbs(), Component.ArticleTitle(), Component.ContentMeta()],
