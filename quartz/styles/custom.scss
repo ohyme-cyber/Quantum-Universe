@@ -2,7 +2,7 @@
 
 /* 强制应用浅色背景颜色 */
 :root[data-theme="light"], :root[aria-theme="light"] {
-  --light: #ead868 !important;
+  --light: #ebd43f !important;
   background-color: var(--light) !important;
 }
 
@@ -23,4 +23,14 @@ body, p, li { font-size: 1rem; line-height: 1.6; }
     a { color: white !important; }
   }
   a { font-weight: bold; text-decoration: none !important; color: var(--tertiary); }
+}
+/* 彻底隐藏标签前的自动 # 号 */
+.tag-link::before {
+  content: none !important; /* 禁用自动生成的 # 符号 */
+  display: none !important;
+}
+
+/* 调整间距，因为去掉了符号，可以适当增加文字边距 */
+.tags li a {
+  padding-left: 0 !important; 
 }
