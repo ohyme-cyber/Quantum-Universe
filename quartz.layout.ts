@@ -28,17 +28,16 @@ export const sharedPageComponents: SharedLayout = {
   footer: Component.Footer({
     links: { GitHub: "https://github.com/ohyme-cyber/Quantum-Universe" },
   }),
-  // 放在这里，它们会根据文件内的判断自动只在主页显示
+  // 全局组件放在这里没问题，因为我们已经在组件内部写了“非主页即消失”的逻辑
   afterBody: [Component.GlobalTags(), Component.TopicGraph()], 
 }
 
-// 2. 笔记内容页布局
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
     Component.Breadcrumbs(),
     Component.ArticleTitle(),
     Component.ContentMeta(),
-    Component.TagList(), // 恢复此组件，让每篇文章只显示自己的标签
+    Component.TagList(), // 这就是让“文章显示自己标签”的关键组件
   ],
   left: [
     Component.PageTitle(),
@@ -48,11 +47,11 @@ export const defaultContentPageLayout: PageLayout = {
     Component.RecentNotes({
       title: "Recently",
       limit: 20,
-      showTags: false, // 侧边栏保持简洁，不显示标签
+      showTags: false, // 侧边栏保持干净
     }),
   ],
   right: [
-    Component.Graph(), // Quartz 原生图谱
+    Component.Graph(), 
     Component.TableOfContents(),
     Component.Backlinks(),
   ],

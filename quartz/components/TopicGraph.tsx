@@ -5,7 +5,7 @@ import topicLinks from "../../content/topic-links.json"
 
 const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
   // 仅在主页显示
-  if (fileData.slug !== "index") return null
+  if (fileData.slug !== "index") {return null}
 
   return (
     <div className={classNames(displayClass, "topic-graph-container")}>

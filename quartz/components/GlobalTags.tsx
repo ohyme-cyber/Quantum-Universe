@@ -3,7 +3,7 @@ import { classNames } from "../util/lang"
 
 const GlobalTags: QuartzComponent = ({ allFiles, displayClass, fileData }: QuartzComponentProps) => {
   // 仅在主页 index 显示，其他页面返回 null
-  if (fileData.slug !== "index") return null 
+  if (fileData.slug !== "index") {return null} 
 
   const allTags = new Set(allFiles.flatMap((f) => f.frontmatter?.tags ?? []))
   const sortedTags = [...allTags].sort()
