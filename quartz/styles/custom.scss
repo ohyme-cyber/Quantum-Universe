@@ -33,7 +33,7 @@ body, p, li { font-size: 1rem; line-height: 1.6; }
   a { font-weight: 500; text-decoration: none !important; color: var(--tertiary); }
 }
 
-/* 课题图谱核心样式 */
+/* 5. 课题图谱核心样式 */
 .topic-graph-container {
   margin-top: 3rem;
   border: 1px solid var(--lightgray);
@@ -66,14 +66,14 @@ body, p, li { font-size: 1rem; line-height: 1.6; }
     }
   }
 
-  /* 全屏模式强制覆盖 */
+  /* 全屏模式逻辑修复 */
   &.maximized {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    z-index: 999999 !important; /* 必须极高 */
+    z-index: 999999 !important; /* 极高层级覆盖一切 */
     background: var(--light) !important;
     margin: 0 !important;
     border-radius: 0 !important;
@@ -107,5 +107,6 @@ body, p, li { font-size: 1rem; line-height: 1.6; }
     border-radius: 15px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.4);
     z-index: 1000002;
+    h4 { margin: 0 0 0.8rem 0; color: var(--secondary); border-bottom: 1px solid var(--lightgray); padding-bottom: 5px; }
   }
 }
