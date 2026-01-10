@@ -2,8 +2,15 @@ import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } fro
 import { classNames } from "../util/lang"
 
 const GlobalTags: QuartzComponent = ({ allFiles, displayClass, fileData }: QuartzComponentProps) => {
-  // 仅在主页 index 显示，其他页面返回 null
-  if (fileData.slug !== "index") {return null} 
+  // 终极判断：只要不是最根目录的主页，就立刻停止渲染
+  // trim('/') 是为了处理某些环境下路径前后的斜杠
+  const isHomePage = fileData.slug === "index" || fileData.slug === ""
+  
+  if (!isHomePage) {
+    return null
+  }
+
+  // 后面的代码保持不变...
 
   const allTags = new Set(allFiles.flatMap((f) => f.frontmatter?.tags ?? []))
   const sortedTags = [...allTags].sort()

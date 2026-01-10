@@ -3,9 +3,13 @@ import { classNames } from "../util/lang"
 // 导入你的 JSON 数据
 import topicLinks from "../../content/topic-links.json"
 
-const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
+const TopicGraph = ({ allFiles,displayClass, fileData }: QuartzComponentProps) => {
   // 仅在主页显示
-  if (fileData.slug !== "index") {return null}
+  const isHomePage = fileData.slug === "index" || fileData.slug === ""
+  
+  if (!isHomePage) {
+    return null
+  }
 
   return (
     <div className={classNames(displayClass, "topic-graph-container")}>
