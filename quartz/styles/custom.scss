@@ -1,55 +1,48 @@
 @use "./base.scss";
 
-/* 1. 颜色修复：确保背景颜色生效 */
-:root[aria-theme="light"] {
-  --light: #ead868; /* 你设置的淡黄色 */
-  background-color: var(--light) !important; /* 强制背景应用此颜色 */
-}
-
-:root[aria-theme="dark"] {
-  --light: #0d1117; /* GitHub 深色风格 */
+/* 1. 强制背景颜色：解决浅色模式不生效 */
+/* Quartz 4 切换主题通常改变的是 data-theme 属性 */
+:root[data-theme="light"], :root[aria-theme="light"] {
+  --light: #ead868 !important; /* 你设置的淡黄色 */
   background-color: var(--light) !important;
 }
 
-/* 2. 字号还原：恢复到 Quartz 默认大小 */
+/* 2. 字号还原为默认 */
 html {
-  font-size: 100%; /* 还原基准字号 */
+  font-size: 100% !important; 
 }
 
-body, p, li, span {
-  font-size: 1rem; /* 恢复默认，不再加倍 */
+body, p, li {
+  font-size: 1rem;
   line-height: 1.6;
 }
 
-h1, h2, h3, h4 {
-  /* 移除之前的 !important，让其跟随系统默认 */
-  margin-top: 1rem;
-}
-
-/* 3. 巨大词条墙 (Tag Wall) 样式 */
-/* 即使字号还原，我们也可以让这个特定的“墙”看起来更醒目 */
+/* 3. 词条墙样式 (维持适中大小，带交互感) */
 .tags {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   padding: 1.5rem 0;
-  margin-top: 2rem;
-  border-top: 1px dashed var(--lightgray);
 
   li {
     background-color: var(--highlight);
-    padding: 0.3rem 0.8rem !important;
+    padding: 0.4rem 1rem !important;
     border-radius: 8px;
-    font-size: 0.9rem !important; /* 词条维持一个适中的大小 */
-    font-weight: 600;
+    border: 1px solid var(--lightgray);
     transition: all 0.2s ease;
 
     &:hover {
-      transform: scale(1.1);
+      transform: translateY(-3px);
       background-color: var(--secondary);
-      a { color: var(--light) !important; }
+      a { color: white !important; }
     }
-    a { text-decoration: none !important; }
+    
+    a {
+      font-size: 1.1rem !important;
+      font-weight: 600;
+      text-decoration: none !important;
+      color: var(--tertiary);
+    }
   }
 }
