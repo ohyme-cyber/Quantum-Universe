@@ -3,7 +3,6 @@ import { classNames } from "../util/lang"
 import topicLinks from "../../content/topic-links.json"
 
 const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
-  // 仅在主页 index 显示
   if (fileData.slug !== "index") return null
 
   return (
@@ -13,10 +12,9 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
         <button id="graph-maximize-btn" type="button">全屏查看</button>
       </div>
       
-      {/* 图谱根容器 */}
-      <div id="topic-graph-root" style={{ width: '100%', height: '400px', background: '#1a1a1a' }}></div>
+      {/* 确保背景不是纯黑，方便观察容器是否加载 */}
+      <div id="topic-graph-root" style={{ width: '100%', height: '400px', background: 'var(--highlight)' }}></div>
 
-      {/* Idea 展示框 */}
       <div id="idea-box" className="idea-box" style={{ display: 'none' }}>
         <h4>💡 研究关联思路</h4>
         <p id="idea-content"></p>
@@ -30,9 +28,10 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
 
 TopicGraph.afterDOMDidLoad = `
   (function() {
-    console.log("TopicGraph: 脚本开始初始化...");
+    console.log("TopicGraph: 开始加载脚本...");
     
     const initGraph = () => {
+      console.log("TopicGraph: 准备初始化图谱内容...");
       const root = document.getElementById('topic-graph-root');
       const container = document.getElementById('topic-graph-container');
       const maxBtn = document.getElementById('graph-maximize-btn');
@@ -41,12 +40,9 @@ TopicGraph.afterDOMDidLoad = `
       const closeBtn = document.getElementById('idea-close-btn');
 
       if (!root || !container || !maxBtn) {
-        console.warn("TopicGraph: 正在等待 HTML 元素渲染...");
-        setTimeout(initGraph, 500); // 如果没找到元素，半秒后重试
+        console.error("TopicGraph: 关键 HTML 元素缺失！");
         return;
       }
-
-      console.log("TopicGraph: 元素已就绪，开始渲染图谱");
 
       const Graph = ForceGraph()(root)
         .graphData({
@@ -57,7 +53,7 @@ TopicGraph.afterDOMDidLoad = `
           links: window.topicLinks
         })
         .nodeLabel('id')
-        .nodeColor(() => '#ebd43f') // 使用你的主色调
+        .nodeColor(() => '#ebd43f')
         .linkDirectionalParticles(2)
         .width(root.offsetWidth)
         .height(400)
@@ -66,44 +62,52 @@ TopicGraph.afterDOMDidLoad = `
           ideaBox.style.display = 'block';
         });
 
-      // 全屏逻辑
       maxBtn.onclick = (e) => {
         e.preventDefault();
-        console.log("TopicGraph: 触发全屏切换");
         container.classList.toggle('maximized');
         const isMax = container.classList.contains('maximized');
         maxBtn.innerText = isMax ? '退出全屏' : '全屏查看';
         
-        // 强制重绘
+        // 延迟重绘以适应 CSS 动画
         setTimeout(() => {
-            if (isMax) {
-              Graph.width(window.innerWidth).height(window.innerHeight);
-            } else {
-              Graph.width(container.offsetWidth).height(400);
-            }
+          if (isMax) {
+            Graph.width(window.innerWidth).height(window.innerHeight);
+          } else {
+            Graph.width(container.offsetWidth).height(400);
+          }
         }, 100);
       };
 
       closeBtn.onclick = () => ideaBox.style.display = 'none';
-      
       window.addEventListener('resize', () => {
-        if (container.classList.contains('maximized')) {
-          Graph.width(window.innerWidth).height(window.innerHeight);
-        } else {
-          Graph.width(container.offsetWidth).height(400);
-        }
+        Graph.width(container.classList.contains('maximized') ? window.innerWidth : container.offsetWidth);
       });
+      console.log("TopicGraph: 初始化完成！");
     };
 
-    // 动态加载外部库
-    if (typeof ForceGraph === 'undefined') {
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/force-graph';
-      script.onload = initGraph;
-      document.head.appendChild(script);
-    } else {
-      initGraph();
+    // 备选 CDN 列表，防止被拦截
+    const cdns = [
+      'https://unpkg.com/force-graph',
+      'https://cdn.jsdelivr.net/npm/force-graph',
+      'https://cdnjs.cloudflare.com/ajax/libs/force-graph/1.43.4/force-graph.min.js'
+    ];
+
+    function loadScript(idx) {
+      if (idx >= cdns.length) {
+        console.error("TopicGraph: 所有 CDN 均加载失败，请检查网络或关闭广告屏蔽器。");
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = cdns[idx];
+      s.onload = initGraph;
+      s.onerror = () => {
+        console.warn("TopicGraph: 无法从 " + cdns[idx] + " 加载，尝试下一个...");
+        loadScript(idx + 1);
+      };
+      document.head.appendChild(s);
     }
+
+    loadScript(0);
   })();
 `
 
