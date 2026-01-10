@@ -2,9 +2,23 @@
 
 // put your custom CSS here!
 :root[aria-theme="light"] {
-  --light: #f5f7fa; // 浅色模式背景，你可以改成你喜欢的十六进制颜色
+  --light: #ead868; // 浅色模式背景，你可以改成你喜欢的十六进制颜色
 }
 
 :root[aria-theme="dark"] {
   --light: #0d1117; // 深色模式背景（对应 GitHub 暗黑风）
 }
+// 1. 调整正文字号 (默认通常是 16px 或 1rem)
+// 我们将其设置为 1.5rem (即 1.5 倍)
+body, p, li, span {
+  font-size: 1.2rem !important; // 稍微加大，1.5rem 在网页上可能过大，你可以根据感官调整
+  line-height: 1.6;
+}
+
+// 2. 调整所有标题字号
+h1 { font-size: 2.5rem !important; } // 原始通常是 2rem 左右
+h2 { font-size: 2.1rem !important; }
+h3 { font-size: 1.8rem !important; }
+h4 { font-size: 1.5rem !important; }
+
+// 如果你觉得还是小了，可以把上面的数字继续调大 0.1-0.2
