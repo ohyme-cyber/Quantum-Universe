@@ -22,49 +22,49 @@ h3 { font-size: 1.8rem !important; }
 h4 { font-size: 1.5rem !important; }
 
 // 如果你觉得还是小了，可以把上面的数字继续调大 0.1-0.2
-/* --- 1. 字号整体放大 --- */
+/* --- 1. 字号整体放大 0.5 倍 (150% 缩放) --- */
 html {
-  /* 基准字号放大，实现你要求的 1.5 倍感官效果 */
-  font-size: 120%; 
+  /* 基准字号设为 150%，让所有 rem 单位自动放大 0.5 倍 */
+  font-size: 150%; 
 }
 
 body, section, p, li {
-  font-size: 1.3rem !important; /* 进一步增加正文字重与大小 */
-  line-height: 1.7;
-  letter-spacing: 0.01rem;
+  /* 确保正文有足够的行间距，适合物理研究笔记的大量文本阅读 */
+  line-height: 1.6;
+  font-weight: 450; 
 }
 
-/* 标题同步放大 */
-h1 { font-size: 3.2rem !important; margin-top: 2rem !important; }
-h2 { font-size: 2.6rem !important; }
-h3 { font-size: 2.1rem !important; }
+/* 标题同步放大，并加重视觉分量 */
+h1 { font-size: 2.5rem !important; margin-top: 1.5rem !important; }
+h2 { font-size: 2rem !important; }
+h3 { font-size: 1.6rem !important; }
 
-/* --- 2. 巨大词条墙样式 --- */
+/* --- 2. 巨大词条墙 (Tag Wall) 样式 --- */
 .tags {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  padding: 2.5rem 0;
-  margin: 2rem 0;
+  gap: 12px;
+  padding: 2rem 0;
+  margin: 1.5rem 0;
   border-bottom: 1px solid var(--lightgray);
 
   li {
     background-color: var(--highlight);
-    padding: 0.8rem 1.6rem !important; /* 巨大的内边距 */
-    border-radius: 15px;
-    font-size: 1.5rem !important; /* 巨大的词条字号 */
-    font-weight: 700;
-    border: 2px solid var(--lightgray);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0.4rem 1.2rem !important; 
+    border-radius: 10px;
+    /* 这里的字号已经受到 html 150% 的影响，不需要设得太夸张 */
+    font-size: 1.1rem !important; 
+    font-weight: 600;
+    border: 1px solid var(--lightgray);
+    transition: all 0.2s ease;
 
     &:hover {
       background-color: var(--secondary);
-      transform: translateY(-5px) scale(1.05);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      transform: scale(1.1);
       
       a {
-        color: var(--light) !important;
+        color: white !important;
       }
     }
 
@@ -75,7 +75,7 @@ h3 { font-size: 2.1rem !important; }
   }
 }
 
-/* 侧边栏字号微调，防止重叠 */
+/* 侧边栏字号修正：由于全局放大了，侧边栏需要缩小一点防止溢出 */
 .recent-notes-list {
-  font-size: 1.1rem !important;
+  font-size: 0.8rem !important;
 }

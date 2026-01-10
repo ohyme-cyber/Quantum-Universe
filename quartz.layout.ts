@@ -1,14 +1,7 @@
 import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
 
-// components shared across all pages
-
-
-// components for pages that display a single page (e.g. a single note)
-// 1. 在 defaultContentPageLayout 中修改
-// quartz.layout.ts
-
-// 1. 这里的 sharedPageComponents 负责页面的页眉和页脚
+// 1. 共享布局：补齐了 afterBody 属性，修复 image_8ae590.jpg 的报错
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   header: [],
@@ -17,15 +10,16 @@ export const sharedPageComponents: SharedLayout = {
       GitHub: "https://github.com/ohyme-cyber/Quantum-Universe",
     },
   }),
+  afterBody: [], 
 }
 
-// 2. 这里的 defaultContentPageLayout 负责内容页的布局
+// 2. 内容页布局：修复了 image_8b3b25.jpg 的 linkToMore 报错
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
     Component.Breadcrumbs(),
     Component.ArticleTitle(),
     Component.ContentMeta(),
-    Component.TagList(), // 文章顶部的普通标签展示
+    Component.TagList(), // 这里的标签会被下方 CSS 变成巨大的词条墙
   ],
   left: [
     Component.PageTitle(),
@@ -43,13 +37,15 @@ export const defaultContentPageLayout: PageLayout = {
     Component.RecentNotes({
       title: "Recently",
       limit: 20,
+      // 修复：将 "tags/" 改为 "tags" 并通过 as any 避开严格类型检查，或者设为 false
+      linkToMore: "tags" as any, 
       sort: (f1, f2) => {
-        // 严格按照创建日期排序，新的在前
+        // 严格按照“创建日期”降序排列
         const d1 = f1.dates?.created?.getTime() ?? 0
         const d2 = f2.dates?.created?.getTime() ?? 0
         return d2 - d1
       },
-      filter: (f) => f.slug !== "index", // 过滤掉主页本身
+      filter: (f) => f.slug !== "index",
     }),
   ],
   right: [
@@ -58,7 +54,8 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Backlinks(),
   ],
 }
-// components for pages that display lists of pages  (e.g. tags or folders)
+
+// 3. 列表页布局
 export const defaultListPageLayout: PageLayout = {
   beforeBody: [Component.Breadcrumbs(), Component.ArticleTitle(), Component.ContentMeta()],
   left: [
