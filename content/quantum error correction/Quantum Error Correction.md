@@ -2,6 +2,6 @@
 title: Quantum Error crorrection
 tags:
   - QEC
-  - Minimal
+  - Minimal-Model
 date: 2026-01-10
 ---
