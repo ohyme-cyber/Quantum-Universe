@@ -1,10 +1,5 @@
 [
   {
-    "source": "ETH",
-    "target": "Quantum-Chaos",
-    "idea": "在非厄米系统中，能谱统计的回归规律可能暗示了热化机制的失效。"
-  },
-  {
     "source": "M-Induced",
     "target": "Dual-Circuit",
     "idea": "对偶电路可以提供研究测量诱导相变的解析模型。"
