@@ -12,8 +12,9 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
         <button id="graph-maximize-btn" type="button">全屏查看</button>
       </div>
       
-      {/* 确保背景不是纯黑，方便观察容器是否加载 */}
-      <div id="topic-graph-root" style={{ width: '100%', height: '400px', background: 'var(--highlight)' }}></div>
+      <div id="topic-graph-root" style={{ width: '100%', height: '400px', background: 'rgba(0,0,0,0.1)' }}>
+        <p style={{ textAlign: 'center', paddingTop: '150px', color: '#888' }}>正在加载图谱引擎...</p>
+      </div>
 
       <div id="idea-box" className="idea-box" style={{ display: 'none' }}>
         <h4>💡 研究关联思路</h4>
@@ -28,10 +29,7 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
 
 TopicGraph.afterDOMDidLoad = `
   (function() {
-    console.log("TopicGraph: 开始加载脚本...");
-    
     const initGraph = () => {
-      console.log("TopicGraph: 准备初始化图谱内容...");
       const root = document.getElementById('topic-graph-root');
       const container = document.getElementById('topic-graph-container');
       const maxBtn = document.getElementById('graph-maximize-btn');
@@ -39,10 +37,7 @@ TopicGraph.afterDOMDidLoad = `
       const ideaContent = document.getElementById('idea-content');
       const closeBtn = document.getElementById('idea-close-btn');
 
-      if (!root || !container || !maxBtn) {
-        console.error("TopicGraph: 关键 HTML 元素缺失！");
-        return;
-      }
+      if (!root || !container || !maxBtn) return;
 
       const Graph = ForceGraph()(root)
         .graphData({
@@ -68,24 +63,19 @@ TopicGraph.afterDOMDidLoad = `
         const isMax = container.classList.contains('maximized');
         maxBtn.innerText = isMax ? '退出全屏' : '全屏查看';
         
-        // 延迟重绘以适应 CSS 动画
         setTimeout(() => {
           if (isMax) {
             Graph.width(window.innerWidth).height(window.innerHeight);
           } else {
             Graph.width(container.offsetWidth).height(400);
           }
-        }, 100);
+        }, 200);
       };
 
       closeBtn.onclick = () => ideaBox.style.display = 'none';
-      window.addEventListener('resize', () => {
-        Graph.width(container.classList.contains('maximized') ? window.innerWidth : container.offsetWidth);
-      });
-      console.log("TopicGraph: 初始化完成！");
     };
 
-    // 备选 CDN 列表，防止被拦截
+    // 解决 ERR_BLOCKED_BY_CLIENT：备选 CDN 列表
     const cdns = [
       'https://unpkg.com/force-graph',
       'https://cdn.jsdelivr.net/npm/force-graph',
@@ -93,20 +83,13 @@ TopicGraph.afterDOMDidLoad = `
     ];
 
     function loadScript(idx) {
-      if (idx >= cdns.length) {
-        console.error("TopicGraph: 所有 CDN 均加载失败，请检查网络或关闭广告屏蔽器。");
-        return;
-      }
+      if (idx >= cdns.length) return;
       const s = document.createElement('script');
       s.src = cdns[idx];
       s.onload = initGraph;
-      s.onerror = () => {
-        console.warn("TopicGraph: 无法从 " + cdns[idx] + " 加载，尝试下一个...");
-        loadScript(idx + 1);
-      };
+      s.onerror = () => loadScript(idx + 1);
       document.head.appendChild(s);
     }
-
     loadScript(0);
   })();
 `

@@ -1,4 +1,4 @@
- @use "./base.scss";
+@use "./base.scss";
 
 /* 1. 强制应用浅色背景颜色 */
 :root[data-theme="light"], :root[aria-theme="light"] {
@@ -39,7 +39,7 @@ body, p, li { font-size: 1rem; line-height: 1.6; }
   border: 1px solid var(--lightgray);
   background: var(--light);
   position: relative;
-  z-index: 10; 
+  z-index: 10;
   border-radius: 12px;
   overflow: hidden;
 
@@ -50,9 +50,7 @@ body, p, li { font-size: 1rem; line-height: 1.6; }
     padding: 0.8rem 1.2rem;
     background: var(--highlight);
     border-bottom: 1px solid var(--lightgray);
-    
-    h3 { margin: 0; font-size: 1.1rem; color: var(--dark); }
-    
+    h3 { margin: 0; font-size: 1.1rem; }
     #graph-maximize-btn {
       cursor: pointer;
       padding: 4px 12px;
@@ -61,53 +59,19 @@ body, p, li { font-size: 1rem; line-height: 1.6; }
       border: none;
       border-radius: 4px;
       font-size: 0.85rem;
-      font-weight: bold;
-      transition: opacity 0.2s;
-      &:hover { opacity: 0.8; }
     }
   }
 
-  /* 图谱内部文本框 (Idea Box) */
-  .idea-box {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    width: 300px;
-    max-width: 80%;
-    padding: 1.5rem;
-    background: var(--light);
-    border: 2px solid var(--secondary);
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-    z-index: 1000002; /* 必须高于图谱内容 */
-
-    h4 { margin: 0 0 0.5rem 0; color: var(--secondary); font-size: 1rem; border-bottom: 1px solid var(--lightgray); padding-bottom: 5px; }
-    p { margin: 0; font-size: 0.9rem; line-height: 1.5; color: var(--dark); }
-    
-    #idea-close-btn {
-      margin-top: 1rem;
-      width: 100%;
-      cursor: pointer;
-      background: var(--lightgray);
-      border: none;
-      padding: 5px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-    }
-  }
-
-  /* 全屏模式下的强制覆盖 - 解决 image_99cea8.jpg 的黑屏与无响应问题 */
+  /* 点击全屏后的强制样式 */
   &.maximized {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    z-index: 999999 !important; /* 确保压过 Quartz 的侧边栏 */
-    margin: 0 !important;
-    padding: 0 !important;
+    z-index: 999999 !important; /* 确保压过 Quartz 侧边栏 */
     background: var(--light) !important;
-    border: none !important;
+    margin: 0 !important;
     border-radius: 0 !important;
 
     #topic-graph-root {
@@ -119,19 +83,25 @@ body, p, li { font-size: 1rem; line-height: 1.6; }
       position: absolute;
       top: 20px;
       left: 20px;
-      z-index: 1000001; /* 浮动在图谱之上 */
+      z-index: 1000001;
       background: rgba(var(--highlight), 0.9);
-      backdrop-filter: blur(4px);
       padding: 10px 20px;
       border-radius: 8px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
   }
-}
 
-/* 兼容深色模式的 Idea Box 适配 */
-:root[data-theme="dark"] .idea-box {
-  background: var(--dark) !important;
-  color: var(--light) !important;
-  p { color: var(--light); }
+  .idea-box {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    padding: 1.5rem;
+    background: var(--light);
+    border: 2px solid var(--secondary);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    z-index: 1000002;
+    h4 { margin: 0 0 0.5rem 0; color: var(--secondary); border-bottom: 1px solid var(--lightgray); }
+  }
 }
