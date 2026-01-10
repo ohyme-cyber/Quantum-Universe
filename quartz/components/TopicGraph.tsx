@@ -3,10 +3,10 @@ import { classNames } from "../util/lang"
 import topicLinks from "../../content/topic-links.json"
 
 const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
+  // 仅在主页 index 显示
   if (fileData.slug !== "index") return null
 
   return (
-    /* 必须确保外层 div 有 id="topic-graph-container" */
     <div id="topic-graph-container" className={classNames(displayClass, "topic-graph-container")}>
       <div className="graph-header">
         <h3>课题关联图谱</h3>
@@ -14,7 +14,7 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
       </div>
       
       {/* 图谱根容器 */}
-      <div id="topic-graph-root" style={{ width: '100%', height: '400px', background: 'transparent' }}></div>
+      <div id="topic-graph-root" style={{ width: '100%', height: '400px', background: '#1a1a1a' }}></div>
 
       {/* Idea 展示框 */}
       <div id="idea-box" className="idea-box" style={{ display: 'none' }}>
@@ -30,10 +30,9 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
 
 TopicGraph.afterDOMDidLoad = `
   (function() {
-    // 1. 检查是否已经加载过库，防止重复加载
-    if (window.ForceGraphInitialized) return;
-
-    const loadGraph = () => {
+    console.log("TopicGraph: 脚本开始初始化...");
+    
+    const initGraph = () => {
       const root = document.getElementById('topic-graph-root');
       const container = document.getElementById('topic-graph-container');
       const maxBtn = document.getElementById('graph-maximize-btn');
@@ -41,9 +40,14 @@ TopicGraph.afterDOMDidLoad = `
       const ideaContent = document.getElementById('idea-content');
       const closeBtn = document.getElementById('idea-close-btn');
 
-      if (!root || !container || !maxBtn) return;
+      if (!root || !container || !maxBtn) {
+        console.warn("TopicGraph: 正在等待 HTML 元素渲染...");
+        setTimeout(initGraph, 500); // 如果没找到元素，半秒后重试
+        return;
+      }
 
-      // 初始化图谱逻辑
+      console.log("TopicGraph: 元素已就绪，开始渲染图谱");
+
       const Graph = ForceGraph()(root)
         .graphData({
           nodes: Array.from(new Set([
@@ -53,8 +57,7 @@ TopicGraph.afterDOMDidLoad = `
           links: window.topicLinks
         })
         .nodeLabel('id')
-        .nodeColor(() => '#a69d5f') // 使用你的黄色系作为节点颜色
-        .linkColor(() => '#555')
+        .nodeColor(() => '#ebd43f') // 使用你的主色调
         .linkDirectionalParticles(2)
         .width(root.offsetWidth)
         .height(400)
@@ -63,23 +66,26 @@ TopicGraph.afterDOMDidLoad = `
           ideaBox.style.display = 'block';
         });
 
-      // 全屏按钮响应逻辑
-      maxBtn.onclick = function(e) {
+      // 全屏逻辑
+      maxBtn.onclick = (e) => {
         e.preventDefault();
+        console.log("TopicGraph: 触发全屏切换");
         container.classList.toggle('maximized');
         const isMax = container.classList.contains('maximized');
-        this.innerText = isMax ? '退出全屏' : '全屏查看';
+        maxBtn.innerText = isMax ? '退出全屏' : '全屏查看';
         
-        // 强制触发重绘
-        if (isMax) {
-          Graph.width(window.innerWidth).height(window.innerHeight);
-        } else {
-          Graph.width(container.offsetWidth).height(400);
-        }
+        // 强制重绘
+        setTimeout(() => {
+            if (isMax) {
+              Graph.width(window.innerWidth).height(window.innerHeight);
+            } else {
+              Graph.width(container.offsetWidth).height(400);
+            }
+        }, 100);
       };
 
       closeBtn.onclick = () => ideaBox.style.display = 'none';
-
+      
       window.addEventListener('resize', () => {
         if (container.classList.contains('maximized')) {
           Graph.width(window.innerWidth).height(window.innerHeight);
@@ -87,16 +93,17 @@ TopicGraph.afterDOMDidLoad = `
           Graph.width(container.offsetWidth).height(400);
         }
       });
-      
-      window.ForceGraphInitialized = true;
     };
 
     // 动态加载外部库
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/force-graph';
-    script.async = true;
-    script.onload = loadGraph;
-    document.head.appendChild(script);
+    if (typeof ForceGraph === 'undefined') {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/force-graph';
+      script.onload = initGraph;
+      document.head.appendChild(script);
+    } else {
+      initGraph();
+    }
   })();
 `
 
