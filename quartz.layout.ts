@@ -38,10 +38,18 @@ export const defaultContentPageLayout: PageLayout = {
     }),
     // 添加这个组件来实现左侧“按日期排序”的目录
     Component.RecentNotes({
-      title: "Recently",
-      limit: 20,        // 显示最近的10篇文章
-      showTags: false,  // 侧边栏可以不显示标签以保持简洁
-    }),
+    title: "Recently",
+    limit: 20,
+    // 核心代码：自定义排序逻辑
+    sort: (f1, f2) => {
+    // 优先按照创建日期 (created) 降序排列（新的在前）
+      if (f1.dates?.created && f2.dates?.created) {
+        return f2.dates.created.getTime() - f1.dates.created.getTime()
+      }
+    return 0
+  },
+  filter: (f) => f.slug !== "index", // 过滤掉主页本身
+}),
   ],
   right: [
     Component.Graph(),
