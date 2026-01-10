@@ -1,31 +1,28 @@
 import { QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { classNames } from "../util/lang"
-// 确保此文件路径正确，存放着你的物理研究关联数据
 import topicLinks from "../../content/topic-links.json"
 
 const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
-  // 仅在主页 index 显示，避免在每篇笔记下重复出现
   if (fileData.slug !== "index") return null
 
   return (
-    /* 核心修复：添加了 id="topic-graph-container" */
+    /* 必须确保外层 div 有 id="topic-graph-container" */
     <div id="topic-graph-container" className={classNames(displayClass, "topic-graph-container")}>
       <div className="graph-header">
         <h3>课题关联图谱</h3>
         <button id="graph-maximize-btn" type="button">全屏查看</button>
       </div>
       
-      {/* 图谱渲染区域 */}
-      <div id="topic-graph-root" style={{ width: '100%', height: '350px' }}></div>
+      {/* 图谱根容器 */}
+      <div id="topic-graph-root" style={{ width: '100%', height: '400px', background: 'transparent' }}></div>
 
-      {/* 点击连线显示的 Idea 文本框 */}
+      {/* Idea 展示框 */}
       <div id="idea-box" className="idea-box" style={{ display: 'none' }}>
         <h4>💡 研究关联思路</h4>
         <p id="idea-content"></p>
         <button id="idea-close-btn">关闭</button>
       </div>
 
-      {/* 将 JSON 数据安全注入到浏览器全局环境 */}
       <script dangerouslySetInnerHTML={{ __html: `window.topicLinks = ${JSON.stringify(topicLinks)}` }} />
     </div>
   )
@@ -33,11 +30,10 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
 
 TopicGraph.afterDOMDidLoad = `
   (function() {
-    console.log("TopicGraph: 脚本开始加载...");
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/force-graph'; // 动态加载图谱引擎
-    script.onload = () => {
-      console.log("TopicGraph: 库加载成功");
+    // 1. 检查是否已经加载过库，防止重复加载
+    if (window.ForceGraphInitialized) return;
+
+    const loadGraph = () => {
       const root = document.getElementById('topic-graph-root');
       const container = document.getElementById('topic-graph-container');
       const maxBtn = document.getElementById('graph-maximize-btn');
@@ -45,13 +41,9 @@ TopicGraph.afterDOMDidLoad = `
       const ideaContent = document.getElementById('idea-content');
       const closeBtn = document.getElementById('idea-close-btn');
 
-      // 验证所有必要的 HTML 元素是否已挂载
-      if (!root || !maxBtn || !container) {
-        console.error("TopicGraph: 找不到必要的 HTML 元素，请检查 ID 是否拼写正确");
-        return;
-      }
+      if (!root || !container || !maxBtn) return;
 
-      // 初始化 D3 动力学图谱
+      // 初始化图谱逻辑
       const Graph = ForceGraph()(root)
         .graphData({
           nodes: Array.from(new Set([
@@ -61,43 +53,49 @@ TopicGraph.afterDOMDidLoad = `
           links: window.topicLinks
         })
         .nodeLabel('id')
-        .nodeColor(() => '#tertiary') // 设置节点颜色
-        .linkDirectionalParticles(2) // 连线粒子动画
+        .nodeColor(() => '#a69d5f') // 使用你的黄色系作为节点颜色
+        .linkColor(() => '#555')
+        .linkDirectionalParticles(2)
         .width(root.offsetWidth)
-        .height(350)
+        .height(400)
         .onLinkClick(link => {
-          // 点击连线，在文本框展示关联 idea
           ideaContent.innerText = link.idea;
           ideaBox.style.display = 'block';
         });
 
-      // 绑定全屏切换逻辑
-      maxBtn.addEventListener('click', function(e) {
+      // 全屏按钮响应逻辑
+      maxBtn.onclick = function(e) {
         e.preventDefault();
         container.classList.toggle('maximized');
         const isMax = container.classList.contains('maximized');
-        
         this.innerText = isMax ? '退出全屏' : '全屏查看';
         
-        // 关键：全屏切换后必须手动调用宽度更新，否则画布会显示不全
+        // 强制触发重绘
         if (isMax) {
           Graph.width(window.innerWidth).height(window.innerHeight);
         } else {
-          Graph.width(container.offsetWidth).height(350);
+          Graph.width(container.offsetWidth).height(400);
         }
-      });
+      };
 
       closeBtn.onclick = () => ideaBox.style.display = 'none';
 
-      // 响应窗口尺寸变化
       window.addEventListener('resize', () => {
         if (container.classList.contains('maximized')) {
           Graph.width(window.innerWidth).height(window.innerHeight);
         } else {
-          Graph.width(container.offsetWidth).height(350);
+          Graph.width(container.offsetWidth).height(400);
         }
       });
+      
+      window.ForceGraphInitialized = true;
     };
+
+    // 动态加载外部库
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/force-graph';
+    script.async = true;
+    script.onload = loadGraph;
     document.head.appendChild(script);
   })();
 `
