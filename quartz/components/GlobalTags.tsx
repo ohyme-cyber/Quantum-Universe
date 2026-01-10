@@ -13,7 +13,7 @@ const GlobalTags: QuartzComponent = ({ allFiles, displayClass }: QuartzComponent
           {sortedTags.map((tag) => (
             <li key={tag}>
               <a href={`/tags/${tag}`} className="internal tag-link">
-                #{tag}
+                {tag}
               </a>
             </li>
           ))}
