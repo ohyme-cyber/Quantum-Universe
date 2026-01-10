@@ -1,28 +1,22 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 
 const GlobalTags: QuartzComponent = ({ allFiles, displayClass }: QuartzComponentProps) => {
-  // 自动从所有笔记中提取标签
   const allTags = new Set(allFiles.flatMap((f) => f.frontmatter?.tags ?? []))
   const sortedTags = [...allTags].sort()
 
   if (sortedTags.length > 0) {
     return (
-      <div className={`tags ${displayClass ?? ""}`}>
+      <div className={`global-tags ${displayClass ?? ""}`}>
         <hr />
-        <h3>全站研究词条</h3>
-        <ul className="tags">
-          {sortedTags.map((tag) => {
-            // 手动构建链接，避开报错的 tagTarget
-            // Quartz 默认的标签路径是 /tags/标签名
-            const linkDest = `/tags/${tag}` 
-            return (
-              <li key={tag}>
-                <a href={linkDest} className="internal tag-link">
-                  {tag}
-                </a>
-              </li>
-            )
-          })}
+        <h3 style={{ marginTop: "2rem" }}>全站研究词条</h3>
+        <ul className="tags" style={{ listStyle: "none", display: "flex", flexWrap: "wrap", gap: "10px", padding: 0 }}>
+          {sortedTags.map((tag) => (
+            <li key={tag}>
+              <a href={`/tags/${tag}`} className="internal tag-link">
+                #{tag}
+              </a>
+            </li>
+          ))}
         </ul>
       </div>
     )

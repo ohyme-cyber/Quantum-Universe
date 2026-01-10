@@ -1,48 +1,26 @@
 @use "./base.scss";
 
-/* 1. 强制背景颜色：解决浅色模式不生效 */
-/* Quartz 4 切换主题通常改变的是 data-theme 属性 */
+/* 强制应用浅色背景颜色 */
 :root[data-theme="light"], :root[aria-theme="light"] {
-  --light: #ead868 !important; /* 你设置的淡黄色 */
+  --light: #ead868 !important;
   background-color: var(--light) !important;
 }
 
-/* 2. 字号还原为默认 */
-html {
-  font-size: 100% !important; 
-}
+/* 还原默认字号 */
+html { font-size: 100% !important; }
+body, p, li { font-size: 1rem; line-height: 1.6; }
 
-body, p, li {
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-/* 3. 词条墙样式 (维持适中大小，带交互感) */
-.tags {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 1.5rem 0;
-
-  li {
-    background-color: var(--highlight);
-    padding: 0.4rem 1rem !important;
-    border-radius: 8px;
-    border: 1px solid var(--lightgray);
-    transition: all 0.2s ease;
-
-    &:hover {
-      transform: translateY(-3px);
-      background-color: var(--secondary);
-      a { color: white !important; }
-    }
-    
-    a {
-      font-size: 1.1rem !important;
-      font-weight: 600;
-      text-decoration: none !important;
-      color: var(--tertiary);
-    }
+/* 巨大词条墙美化 */
+.global-tags .tags li {
+  background-color: var(--highlight);
+  padding: 0.4rem 1rem !important;
+  border-radius: 8px;
+  border: 1px solid var(--lightgray);
+  transition: all 0.2s ease;
+  &:hover {
+    transform: translateY(-3px);
+    background-color: var(--secondary);
+    a { color: white !important; }
   }
+  a { font-weight: bold; text-decoration: none !important; color: var(--tertiary); }
 }
