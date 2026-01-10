@@ -1,35 +1,31 @@
 import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
 
-// 1. 共享布局：补齐了 afterBody 属性，修复 image_8ae590.jpg 的报错
+// 1. 全局共享布局 (只定义这一次，解决 redeclare 报错)
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   header: [],
   footer: Component.Footer({
-    links: {
-      GitHub: "https://github.com/ohyme-cyber/Quantum-Universe",
-    },
+    links: { GitHub: "https://github.com/ohyme-cyber/Quantum-Universe" },
   }),
-  afterBody: [], 
+  // 将全站词条墙放在正文结束后的空白处
+  afterBody: [Component.GlobalTags()], 
 }
 
-// 2. 内容页布局：修复了 image_8b3b25.jpg 的 linkToMore 报错
+// 2. 笔记内容页布局
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
     Component.Breadcrumbs(),
     Component.ArticleTitle(),
     Component.ContentMeta(),
-    Component.TagList(), // 这里的标签会被下方 CSS 变成巨大的词条墙
+    // 这里删除了 TagList，所以正文顶部不会再有标签
   ],
   left: [
     Component.PageTitle(),
     Component.MobileOnly(Component.Spacer()),
     Component.Flex({
       components: [
-        {
-          Component: Component.Search(),
-          grow: true,
-        },
+        { Component: Component.Search(), grow: true },
         { Component: Component.Darkmode() },
         { Component: Component.ReaderMode() },
       ],
@@ -37,19 +33,12 @@ export const defaultContentPageLayout: PageLayout = {
     Component.RecentNotes({
       title: "Recently",
       limit: 20,
-      // 修复：将 "tags/" 改为 "tags" 并通过 as any 避开严格类型检查，或者设为 false
-      linkToMore: "tags" as any, 
-      sort: (f1, f2) => {
-        // 严格按照“创建日期”降序排列
-        const d1 = f1.dates?.created?.getTime() ?? 0
-        const d2 = f2.dates?.created?.getTime() ?? 0
-        return d2 - d1
-      },
-      filter: (f) => f.slug !== "index",
+      showTags: false, // 关键：隐藏左侧目录下的标签
+      sort: (f1, f2) => (f2.dates?.created?.getTime() ?? 0) - (f1.dates?.created?.getTime() ?? 0),
     }),
   ],
   right: [
-    Component.Graph(),
+    Component.Graph(), // 这就是你问的图谱
     Component.TableOfContents(),
     Component.Backlinks(),
   ],
@@ -63,10 +52,7 @@ export const defaultListPageLayout: PageLayout = {
     Component.MobileOnly(Component.Spacer()),
     Component.Flex({
       components: [
-        {
-          Component: Component.Search(),
-          grow: true,
-        },
+        { Component: Component.Search(), grow: true },
         { Component: Component.Darkmode() },
       ],
     }),
