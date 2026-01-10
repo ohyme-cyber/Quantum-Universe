@@ -1,8 +1,8 @@
 ---
-title: Quantum Universe 知识库
+title: Quantum Universe
 tags:
   - research
   - ETH
   - MIPT
 ---
-Welcome!wwweqweqweqeweqwweqwewq
+Welcome to my Quantum Universe! Here, minimal models, as well as designed models are collected, based on my personal interest.
