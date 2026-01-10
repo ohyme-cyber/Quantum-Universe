@@ -22,3 +22,60 @@ h3 { font-size: 1.8rem !important; }
 h4 { font-size: 1.5rem !important; }
 
 // 如果你觉得还是小了，可以把上面的数字继续调大 0.1-0.2
+/* --- 1. 字号整体放大 --- */
+html {
+  /* 基准字号放大，实现你要求的 1.5 倍感官效果 */
+  font-size: 120%; 
+}
+
+body, section, p, li {
+  font-size: 1.3rem !important; /* 进一步增加正文字重与大小 */
+  line-height: 1.7;
+  letter-spacing: 0.01rem;
+}
+
+/* 标题同步放大 */
+h1 { font-size: 3.2rem !important; margin-top: 2rem !important; }
+h2 { font-size: 2.6rem !important; }
+h3 { font-size: 2.1rem !important; }
+
+/* --- 2. 巨大词条墙样式 --- */
+.tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 2.5rem 0;
+  margin: 2rem 0;
+  border-bottom: 1px solid var(--lightgray);
+
+  li {
+    background-color: var(--highlight);
+    padding: 0.8rem 1.6rem !important; /* 巨大的内边距 */
+    border-radius: 15px;
+    font-size: 1.5rem !important; /* 巨大的词条字号 */
+    font-weight: 700;
+    border: 2px solid var(--lightgray);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      background-color: var(--secondary);
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      
+      a {
+        color: var(--light) !important;
+      }
+    }
+
+    a {
+      text-decoration: none !important;
+      color: var(--tertiary);
+    }
+  }
+}
+
+/* 侧边栏字号微调，防止重叠 */
+.recent-notes-list {
+  font-size: 1.1rem !important;
+}

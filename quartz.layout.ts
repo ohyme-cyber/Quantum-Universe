@@ -2,26 +2,30 @@ import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
 
 // components shared across all pages
+
+
+// components for pages that display a single page (e.g. a single note)
+// 1. 在 defaultContentPageLayout 中修改
+// quartz.layout.ts
+
+// 1. 这里的 sharedPageComponents 负责页面的页眉和页脚
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   header: [],
-  afterBody: [],
   footer: Component.Footer({
     links: {
-      GitHub: "https://github.com/jackyzha0/quartz",
-      "Discord Community": "https://discord.gg/cRFFHYye7t",
+      GitHub: "https://github.com/ohyme-cyber/Quantum-Universe",
     },
   }),
 }
 
-// components for pages that display a single page (e.g. a single note)
-// 1. 在 defaultContentPageLayout 中修改
+// 2. 这里的 defaultContentPageLayout 负责内容页的布局
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
     Component.Breadcrumbs(),
     Component.ArticleTitle(),
     Component.ContentMeta(),
-    Component.TagList(), // 这会显示当前文章的标签，点击可跳转
+    Component.TagList(), // 文章顶部的普通标签展示
   ],
   left: [
     Component.PageTitle(),
@@ -29,27 +33,24 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Flex({
       components: [
         {
-          Component: Component.Search(), // 这里就是你要求的高级检索，支持题目和全文
+          Component: Component.Search(),
           grow: true,
         },
         { Component: Component.Darkmode() },
         { Component: Component.ReaderMode() },
       ],
     }),
-    // 添加这个组件来实现左侧“按日期排序”的目录
     Component.RecentNotes({
-    title: "Recently",
-    limit: 20,
-    // 核心代码：自定义排序逻辑
-    sort: (f1, f2) => {
-    // 优先按照创建日期 (created) 降序排列（新的在前）
-      if (f1.dates?.created && f2.dates?.created) {
-        return f2.dates.created.getTime() - f1.dates.created.getTime()
-      }
-    return 0
-  },
-  filter: (f) => f.slug !== "index", // 过滤掉主页本身
-}),
+      title: "Recently",
+      limit: 20,
+      sort: (f1, f2) => {
+        // 严格按照创建日期排序，新的在前
+        const d1 = f1.dates?.created?.getTime() ?? 0
+        const d2 = f2.dates?.created?.getTime() ?? 0
+        return d2 - d1
+      },
+      filter: (f) => f.slug !== "index", // 过滤掉主页本身
+    }),
   ],
   right: [
     Component.Graph(),
