@@ -16,14 +16,13 @@ export const sharedPageComponents: SharedLayout = {
 
 // components for pages that display a single page (e.g. a single note)
 export const defaultContentPageLayout: PageLayout = {
-  beforeBody: [
-    Component.ConditionalRender({
-      component: Component.Breadcrumbs(),
-      condition: (page) => page.fileData.slug !== "index",
-    }),
+beforeBody: [
+    Component.Breadcrumbs(),
     Component.ArticleTitle(),
-    Component.ContentMeta(),
-    Component.TagList(),
+    // 1. 将 ContentMeta 还原为不带参数的形式，或者删除它
+    Component.ContentMeta(), 
+    // 2. 专门添加 TagList 组件，这会处理标签的显示和点击跳转
+    Component.TagList(), 
   ],
   left: [
     Component.PageTitle(),

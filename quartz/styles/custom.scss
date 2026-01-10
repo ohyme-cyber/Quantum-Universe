@@ -1,3 +1,10 @@
 @use "./base.scss";
 
 // put your custom CSS here!
+:root[aria-theme="light"] {
+  --light: #f5f7fa; // 浅色模式背景，你可以改成你喜欢的十六进制颜色
+}
+
+:root[aria-theme="dark"] {
+  --light: #0d1117; // 深色模式背景（对应 GitHub 暗黑风）
+}
