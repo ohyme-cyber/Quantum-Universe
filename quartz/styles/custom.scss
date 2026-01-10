@@ -51,3 +51,29 @@ body, p, li { font-size: 1rem; line-height: 1.6; }
     font-weight: 500;
   }
 }
+.topic-graph-container {
+  margin-top: 3rem;
+  border: 1px solid var(--lightgray);
+  position: relative;
+  background: var(--light);
+
+  &.maximized {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 999;
+    padding: 1rem;
+  }
+
+  .idea-box {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 280px;
+    padding: 1rem;
+    background: var(--highlight);
+    border: 2px solid var(--secondary);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+  }
+}
