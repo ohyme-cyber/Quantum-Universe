@@ -3,7 +3,7 @@ import { classNames } from "../util/lang"
 import topicLinks from "../../content/topic-links.json"
 
 const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
-  // 适配 Quartz 首页 slug
+  // 只在首页显示
   if (fileData.slug !== "index" && fileData.slug !== "") return null
 
   return (
@@ -32,7 +32,7 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
 
 TopicGraph.afterDOMDidLoad = `
   (function() {
-    console.log("🚀 [TopicGraph] 核心脚本已载入");
+    console.log("🚀 [TopicGraph] 脚本已激活");
     let graph = null;
 
     const render = () => {
@@ -43,12 +43,12 @@ TopicGraph.afterDOMDidLoad = `
       if (!root || !window.topicLinks) return;
 
       if (typeof ForceGraph === 'undefined') {
-        console.log("⏳ [TopicGraph] 等待引擎库加载...");
+        console.log("⏳ [TopicGraph] 等待引擎库载入...");
         setTimeout(render, 500);
         return;
       }
 
-      console.log("✅ [TopicGraph] 开始绘图");
+      console.log("✅ [TopicGraph] 引擎就绪，开始绘图");
       const status = document.getElementById('graph-status-text');
       if (status) status.style.display = 'none';
       
