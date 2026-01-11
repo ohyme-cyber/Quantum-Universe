@@ -6,6 +6,8 @@ tags:
   - Statistics
 date: 2026-01-10
 ---
-Symplectic Random Ensemble:
-$\left|\psi\right>$=$S\left|0\right>$, $S\sim \text{CSE}$
-is statistically indistinguishble from Haar Ense
+Symplectic Random Ensemble: $\left|\psi\right>$=$S\left|0\right>$, $S\sim \text{CSE}$
+is statistically indistinguishable from Haar Ensemble.
+Reference: https://arxiv.org/pdf/2409.16500
+
+Btw, 另一种约束:
