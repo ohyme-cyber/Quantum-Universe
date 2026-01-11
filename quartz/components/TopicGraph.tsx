@@ -3,7 +3,7 @@ import { classNames } from "../util/lang"
 import topicLinks from "../../content/topic-links.json"
 
 const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
-  // 适配 Quartz 首页 slug
+  // 只在首页显示
   if (fileData.slug !== "index" && fileData.slug !== "") return null
 
   return (
@@ -32,30 +32,25 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
 
 TopicGraph.afterDOMDidLoad = `
   (function() {
-    // 强制日志输出，确认脚本存活
-    console.log("🚀 [TopicGraph] 核心脚本已载入浏览器作用域");
-
+    console.log("🚀 [TopicGraph] 核心脚本已载入浏览器");
     let graph = null;
 
-    const renderGraph = () => {
+    const render = () => {
       const root = document.getElementById('topic-graph-root');
       const btn = document.getElementById('graph-maximize-btn');
       const container = document.getElementById('topic-graph-container');
       
-      if (!root || !window.topicLinks) {
-        console.warn("⚠️ [TopicGraph] 未找到容器或数据，跳过渲染");
-        return;
-      }
+      if (!root || !window.topicLinks) return;
 
       if (typeof ForceGraph === 'undefined') {
-        console.log("⏳ [TopicGraph] 库未就绪，500ms 后重试...");
-        setTimeout(renderGraph, 500);
+        console.log("⏳ [TopicGraph] 等待库加载...");
+        setTimeout(render, 500);
         return;
       }
 
-      console.log("✅ [TopicGraph] 环境就绪，开始渲染。关联数:", window.topicLinks.length);
-      const statusText = document.getElementById('graph-status-text');
-      if (statusText) statusText.style.display = 'none';
+      console.log("✅ [TopicGraph] 开始渲染，数据点:", window.topicLinks.length);
+      const status = document.getElementById('graph-status-text');
+      if (status) status.style.display = 'none';
       
       root.innerHTML = '';
       graph = ForceGraph()(root)
@@ -76,11 +71,8 @@ TopicGraph.afterDOMDidLoad = `
           }
         });
 
-      // 针对少节点的初始缩放
-      setTimeout(() => { 
-        graph.zoomToFit(400, 50); 
-        if(window.topicLinks.length < 2) graph.zoom(4);
-      }, 500);
+      // 自动缩放
+      setTimeout(() => graph.zoomToFit(400, 50), 500);
 
       btn.onclick = (e) => {
         e.preventDefault();
@@ -90,25 +82,23 @@ TopicGraph.afterDOMDidLoad = `
           graph.width(isMax ? window.innerWidth : container.offsetWidth)
                .height(isMax ? window.innerHeight : 400);
           graph.zoomToFit(400);
-        }, 150);
+        }, 200);
       };
       
       const closeBtn = document.getElementById('idea-close-btn');
       if (closeBtn) closeBtn.onclick = () => document.getElementById('idea-box').style.display = 'none';
     };
 
-    // 如果库还没加载，动态插入 CDN
     if (typeof ForceGraph === 'undefined') {
       const s = document.createElement('script');
       s.src = 'https://cdn.jsdelivr.net/npm/force-graph@1.43.4/dist/force-graph.min.js';
-      s.onload = renderGraph;
+      s.onload = render;
       document.head.appendChild(s);
     } else {
-      renderGraph();
+      render();
     }
 
-    // 适配 Quartz SPA 导航
-    document.addEventListener("nav", renderGraph);
+    document.addEventListener("nav", render);
   })();
 `
 
@@ -116,10 +106,10 @@ TopicGraph.css = `
 .topic-graph-container.maximized {
   position: fixed !important;
   top: 0; left: 0; width: 100vw !important; height: 100vh !important;
-  z-index: 999999 !important; background: var(--light) !important; margin: 0 !important;
+  zIndex: 999999 !important; background: var(--light) !important; margin: 0 !important;
 }
 .topic-graph-container.maximized .graph-header {
-  position: absolute; top: 20px; right: 20px; z-index: 1000000;
+  position: absolute; top: 20px; right: 20px; zIndex: 1000000;
   background: rgba(var(--highlight), 0.8); padding: 10px; border-radius: 8px;
 }
 `
