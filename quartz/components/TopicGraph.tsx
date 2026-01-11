@@ -3,67 +3,77 @@ import { classNames } from "../util/lang"
 import topicLinks from "../../content/topic-links.json"
 
 const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
-  // 确认 slug 是否正确（有些 Quartz 配置首页 slug 为 "" 或 "index"）
-  if (fileData.slug !== "index" && fileData.slug !== "") return null
+  // 仅在主页 index 显示，防止在每篇笔记下乱跑
+  if (fileData.slug !== "index") return null
 
   return (
+    /* 核心修复：添加了 id="topic-graph-container"，这是全屏响应的关键 */
     <div id="topic-graph-container" className={classNames(displayClass, "topic-graph-container")}>
       <div className="graph-header">
         <h3>课题关联图谱</h3>
         <button id="graph-maximize-btn" type="button">全屏查看</button>
       </div>
       
-      <div id="topic-graph-root" style={{ width: '100%', height: '400px', minHeight: '400px', background: 'rgba(0,0,0,0.02)' }}>
-        <p id="graph-status-text" style={{ textAlign: 'center', paddingTop: '150px', color: '#888' }}>
-          正在检查环境...
-        </p>
+      {/* 图谱渲染根区域 */}
+      <div id="topic-graph-root" style={{ width: '100%', height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.05)' }}>
+        <p id="graph-status-text" style={{ color: '#888', margin: 0 }}>正在初始化环境...</p>
       </div>
 
+      {/* 点击连线后的文本框 */}
       <div id="idea-box" className="idea-box" style={{ display: 'none' }}>
         <h4>💡 研究关联思路</h4>
         <p id="idea-content"></p>
         <button id="idea-close-btn">关闭</button>
       </div>
 
-      <script dangerouslySetInnerHTML={{ __html: `window.topicLinks = ${JSON.stringify(topicLinks)}; console.log('TopicGraph: 数据已注入', window.topicLinks);` }} />
+      <script dangerouslySetInnerHTML={{ __html: `window.topicLinks = ${JSON.stringify(topicLinks)}` }} />
     </div>
   )
 }
 
 TopicGraph.afterDOMDidLoad = `
   (function() {
-    console.log("TopicGraph: 脚本已加载到页面");
-
-    const runInit = () => {
-      console.log("TopicGraph: 开始执行初始化 (init)");
+    console.log("TopicGraph: 脚本开始执行...");
+    
+    const startLogic = () => {
       const container = document.getElementById('topic-graph-container');
       const root = document.getElementById('topic-graph-root');
       const maxBtn = document.getElementById('graph-maximize-btn');
       const statusText = document.getElementById('graph-status-text');
+      let GraphInstance = null;
 
-      if (!container || !root || !maxBtn) {
-        console.warn("TopicGraph: 未发现图谱容器，跳过初始化。当前页面 Slug:", document.body.dataset.slug);
+      if (!container || !maxBtn || !root) {
+        console.warn("TopicGraph: 找不到必要元素，0.5秒后重试...");
+        setTimeout(startLogic, 500);
         return;
       }
 
-      console.log("TopicGraph: 找到所有 DOM 元素，准备加载库");
-
-      const render = () => {
-        if (typeof ForceGraph === 'undefined') {
-          console.error("TopicGraph: ForceGraph 库加载失败，无法渲染");
-          return;
+      // 1. 立即绑定全屏按钮（不依赖图谱库），解决点击无响应
+      maxBtn.onclick = (e) => {
+        e.preventDefault();
+        console.log("TopicGraph: 切换全屏状态");
+        container.classList.toggle('maximized');
+        const isMax = container.classList.contains('maximized');
+        maxBtn.innerText = isMax ? '退出全屏' : '全屏查看';
+        
+        if (GraphInstance) {
+          setTimeout(() => {
+            GraphInstance.width(isMax ? window.innerWidth : container.offsetWidth)
+                         .height(isMax ? window.innerHeight : 400);
+          }, 300);
         }
-        if (!window.topicLinks || window.topicLinks.length === 0) {
-          console.error("TopicGraph: window.topicLinks 数据为空");
-          if (statusText) statusText.innerText = "错误：数据源为空";
-          return;
-        }
+      };
 
-        console.log("TopicGraph: 准备渲染图谱，节点数:", window.topicLinks.length);
+      // 2. 初始化图谱库逻辑
+      const initGraph = () => {
+        if (typeof ForceGraph === 'undefined') return;
         if (statusText) statusText.style.display = 'none';
-        root.innerHTML = ''; 
+        
+        const ideaBox = document.getElementById('idea-box');
+        const ideaContent = document.getElementById('idea-content');
+        const closeBtn = document.getElementById('idea-close-btn');
 
-        const Graph = ForceGraph()(root)
+        GraphInstance = ForceGraph()(root)
           .graphData({
             nodes: Array.from(new Set([
               ...window.topicLinks.map(l => l.source),
@@ -72,57 +82,50 @@ TopicGraph.afterDOMDidLoad = `
             links: window.topicLinks
           })
           .nodeLabel('id')
-          .nodeColor(() => '#ebd43f')
+          .nodeColor(() => '#ebd43f') // 设置节点为你的主黄色
           .linkDirectionalParticles(2)
           .width(root.offsetWidth)
           .height(400)
           .onLinkClick(link => {
-            const box = document.getElementById('idea-box');
-            const content = document.getElementById('idea-content');
-            if (box && content) {
-              content.innerText = link.idea || '暂无思路描述';
-              box.style.display = 'block';
+            if (ideaBox && ideaContent) {
+              ideaContent.innerText = link.idea;
+              ideaBox.style.display = 'block';
             }
           });
 
-        maxBtn.onclick = (e) => {
-          e.preventDefault();
-          const isMax = container.classList.toggle('maximized');
-          maxBtn.innerText = isMax ? '退出全屏' : '全屏查看';
-          setTimeout(() => {
-            Graph.width(isMax ? window.innerWidth : container.offsetWidth)
-                 .height(isMax ? window.innerHeight : 400);
-          }, 200);
-        };
-        
-        console.log("TopicGraph: 渲染完成");
+        if (closeBtn && ideaBox) closeBtn.onclick = () => ideaBox.style.display = 'none';
+        console.log("TopicGraph: 图谱绘制成功");
       };
 
-      if (typeof ForceGraph === 'undefined') {
+      // 3. 多 CDN 容错加载，防止 ERR_BLOCKED_BY_CLIENT
+      const cdns = [
+        'https://cdn.jsdelivr.net/npm/force-graph@1.43.4/dist/force-graph.min.js',
+        'https://unpkg.com/force-graph@1.43.4/dist/force-graph.min.js'
+      ];
+
+      function tryLoad(index) {
+        if (index >= cdns.length) {
+          if (statusText) statusText.innerText = "加载失败，请检查网络或关闭插件。";
+          return;
+        }
         const s = document.createElement('script');
-        s.src = 'https://unpkg.com/force-graph@1.43.4/dist/force-graph.min.js';
+        s.src = cdns[index];
         s.async = true;
-        s.onload = () => { console.log("TopicGraph: 库加载成功"); render(); };
-        s.onerror = () => { console.error("TopicGraph: 库加载失败 (网络问题)"); };
+        s.onload = initGraph;
+        s.onerror = () => tryLoad(index + 1);
         document.head.appendChild(s);
+      }
+
+      if (typeof ForceGraph === 'undefined') {
+        tryLoad(0);
       } else {
-        render();
+        initGraph();
       }
     };
 
-    // 针对 Quartz 的不同加载场景执行
-    document.addEventListener("nav", () => {
-      console.log("TopicGraph: 监听到 Quartz 导航切换");
-      runInit();
-    });
-    
-    // 页面初次载入
-    if (document.readyState === 'complete') {
-        runInit();
-    } else {
-        window.addEventListener('load', runInit);
-    }
+    startLogic();
   })();
 `
 
+TopicGraph.css = ``
 export default (() => TopicGraph) satisfies QuartzComponentConstructor
