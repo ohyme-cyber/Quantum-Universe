@@ -106,6 +106,9 @@ TopicGraph.afterDOMDidLoad = `
   })();
 `
 
+// ... 上方的代码保持不变 ...
+
+// 1. 确保这里的反引号在样式结束后立即关闭！
 TopicGraph.css = `
 .topic-graph-container.maximized {
   position: fixed !important;
@@ -116,10 +119,8 @@ TopicGraph.css = `
   background: var(--light) !important;
   margin: 0 !important;
 }
-.topic-graph-container.maximized .graph-header {
-  position: absolute; top: 20px; right: 20px; z-index: 1000000;
-  background: rgba(var(--highlight), 0.8); backdrop-filter: blur(10px); padding: 10px; border-radius: 8px;
-}
 `
 
+// 2. 导出语句必须在反引号外面，不能变色（在 VS Code 中应该是绿/蓝色而非红色字符串色）
 export default (() => TopicGraph) satisfies QuartzComponentConstructor
+
