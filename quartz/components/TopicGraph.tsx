@@ -13,7 +13,7 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
       </div>
       
       <div id="topic-graph-root" style={{ width: '100%', height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.05)', borderRadius: '8px' }}>
-        <p id="graph-status-text" style={{ color: '#888', margin: 0 }}>正在准备绘图环境...</p>
+        <p id="graph-status-text" style={{ color: '#888', margin: 0 }}>绘图引擎启动中...</p>
       </div>
 
       <div id="idea-box" className="idea-box" style={{ display: 'none' }}>
@@ -29,10 +29,10 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
 
 TopicGraph.afterDOMDidLoad = `
   (function() {
+    console.log("TopicGraph: 脚本开始执行...");
     let graphInstance = null;
 
     const init = () => {
-      console.log("TopicGraph: 脚本开始运行...");
       const root = document.getElementById('topic-graph-root');
       const container = document.getElementById('topic-graph-container');
       const btn = document.getElementById('graph-maximize-btn');
@@ -40,7 +40,7 @@ TopicGraph.afterDOMDidLoad = `
 
       const render = () => {
         if (typeof ForceGraph === 'undefined') {
-          console.error("TopicGraph: ForceGraph 库未加载");
+          console.error("TopicGraph: ForceGraph 库加载失败");
           return;
         }
         const status = document.getElementById('graph-status-text');
@@ -60,13 +60,9 @@ TopicGraph.afterDOMDidLoad = `
           .width(root.offsetWidth)
           .height(400)
           .linkDirectionalParticles(2)
-          .onLinkClick(link => {
-            const box = document.getElementById('idea-box');
-            const content = document.getElementById('idea-content');
-            if (box && content) {
-              content.innerText = link.idea || '暂无描述';
-              box.style.display = 'block';
-            }
+          .onRenderFramePost(() => {
+             // 针对只有一个链接的情况进行视角优化
+             if(window.topicLinks.length === 1) graphInstance.zoom(2.5);
           });
 
         btn.onclick = (e) => {
@@ -76,7 +72,7 @@ TopicGraph.afterDOMDidLoad = `
           setTimeout(() => {
             graphInstance.width(isMax ? window.innerWidth : container.offsetWidth)
                          .height(isMax ? window.innerHeight : 400);
-            graphInstance.zoomToFit(400); // 全屏后自动缩放以适应节点
+            graphInstance.zoomToFit(400); 
           }, 200);
         };
       };
@@ -96,26 +92,16 @@ TopicGraph.afterDOMDidLoad = `
   })();
 `
 
-// --- 关键点：这里的反引号必须在 export 之前闭合 ---
+// 注意：反引号在这里闭合，不要包裹下方的 export
 TopicGraph.css = `
 .topic-graph-container.maximized {
   position: fixed !important;
-  top: 0; left: 0; 
-  width: 100vw !important; 
-  height: 100vh !important;
-  z-index: 999999 !important; 
-  background: #1a1b1e !important; /* 强制暗色背景适配图谱 */
-  margin: 0 !important;
-  border-radius: 0 !important;
+  top: 0; left: 0; width: 100vw !important; height: 100vh !important;
+  z-index: 999999 !important; background: #1a1b1e !important; margin: 0 !important;
 }
 .topic-graph-container.maximized .graph-header {
-  position: absolute;
-  top: 20px; right: 20px;
-  z-index: 1000000;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 10px;
-  border-radius: 8px;
+  position: absolute; top: 20px; right: 20px; z-index: 1000000;
+  background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 10px; border-radius: 8px;
 }
 `
 
