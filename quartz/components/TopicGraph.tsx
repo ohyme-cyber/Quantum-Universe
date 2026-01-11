@@ -3,7 +3,7 @@ import { classNames } from "../util/lang"
 import topicLinks from "../../content/topic-links.json"
 
 const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
-  // 只在首页显示
+  // 适配 Quartz 首页 slug
   if (fileData.slug !== "index" && fileData.slug !== "") return null
 
   return (
@@ -15,7 +15,7 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
       
       <div id="topic-graph-root" style={{ width: '100%', height: '400px', background: 'rgba(0,0,0,0.05)', borderRadius: '8px', position: 'relative' }}>
         <p id="graph-status-text" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#888', margin: 0 }}>
-          正在启动量子绘图引擎...
+          量子绘图引擎准备中...
         </p>
       </div>
 
@@ -32,7 +32,7 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
 
 TopicGraph.afterDOMDidLoad = `
   (function() {
-    console.log("🚀 [TopicGraph] 核心脚本已载入浏览器");
+    console.log("🚀 [TopicGraph] 核心脚本已载入");
     let graph = null;
 
     const render = () => {
@@ -43,12 +43,12 @@ TopicGraph.afterDOMDidLoad = `
       if (!root || !window.topicLinks) return;
 
       if (typeof ForceGraph === 'undefined') {
-        console.log("⏳ [TopicGraph] 等待库加载...");
+        console.log("⏳ [TopicGraph] 等待引擎库加载...");
         setTimeout(render, 500);
         return;
       }
 
-      console.log("✅ [TopicGraph] 开始渲染，数据点:", window.topicLinks.length);
+      console.log("✅ [TopicGraph] 开始绘图");
       const status = document.getElementById('graph-status-text');
       if (status) status.style.display = 'none';
       
@@ -71,7 +71,6 @@ TopicGraph.afterDOMDidLoad = `
           }
         });
 
-      // 自动缩放
       setTimeout(() => graph.zoomToFit(400, 50), 500);
 
       btn.onclick = (e) => {
@@ -106,10 +105,10 @@ TopicGraph.css = `
 .topic-graph-container.maximized {
   position: fixed !important;
   top: 0; left: 0; width: 100vw !important; height: 100vh !important;
-  zIndex: 999999 !important; background: var(--light) !important; margin: 0 !important;
+  z-index: 999999 !important; background: var(--light) !important; margin: 0 !important;
 }
 .topic-graph-container.maximized .graph-header {
-  position: absolute; top: 20px; right: 20px; zIndex: 1000000;
+  position: absolute; top: 20px; right: 20px; z-index: 1000000;
   background: rgba(var(--highlight), 0.8); padding: 10px; border-radius: 8px;
 }
 `
