@@ -3,7 +3,6 @@ import { classNames } from "../util/lang"
 import topicLinks from "../../content/topic-links.json"
 
 const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
-  // 仅在首页展示
   if (fileData.slug !== "index" && fileData.slug !== "") return null
 
   return (
@@ -28,11 +27,9 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
   )
 }
 
-// 注意这里的反引号闭合位置
 TopicGraph.afterDOMDidLoad = `
   (function() {
     let graphInstance = null;
-
     const init = () => {
       const root = document.getElementById('topic-graph-root');
       const container = document.getElementById('topic-graph-container');
@@ -43,10 +40,7 @@ TopicGraph.afterDOMDidLoad = `
         if (typeof ForceGraph === 'undefined') return;
         const status = document.getElementById('graph-status-text');
         if (status) status.style.display = 'none';
-
-        // 防止重复渲染
         root.innerHTML = '';
-
         graphInstance = ForceGraph()(root)
           .graphData({
             nodes: Array.from(new Set([
@@ -58,15 +52,7 @@ TopicGraph.afterDOMDidLoad = `
           .nodeLabel('id')
           .nodeColor(() => '#ebd43f')
           .width(root.offsetWidth)
-          .height(400)
-          .onLinkClick(link => {
-            const box = document.getElementById('idea-box');
-            const content = document.getElementById('idea-content');
-            if (box && content) {
-              content.innerText = link.idea || '暂无描述';
-              box.style.display = 'block';
-            }
-          });
+          .height(400);
 
         btn.onclick = (e) => {
           e.preventDefault();
@@ -88,20 +74,19 @@ TopicGraph.afterDOMDidLoad = `
         render();
       }
     };
-
     document.addEventListener("nav", init);
     init();
   })();
 `
 
-// 样式也请写在这里，并确保反引号正确关闭
+// 注意：CSS 的反引号必须在样式结束后立即关闭！
 TopicGraph.css = `
 .topic-graph-container.maximized {
   position: fixed !important;
   top: 0; left: 0; width: 100vw; height: 100vh;
-  z-index: 99999; background: var(--light);
+  z-index: 99999; background: var(--light) !important;
 }
 `
 
-// 关键：导出语句必须在最外层，不能被任何引号包裹
+// 导出语句必须在最外层，不能被任何反引号包裹
 export default (() => TopicGraph) satisfies QuartzComponentConstructor
