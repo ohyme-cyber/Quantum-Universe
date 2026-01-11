@@ -3,7 +3,6 @@ import { classNames } from "../util/lang"
 import topicLinks from "../../content/topic-links.json"
 
 const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
-  // 确保在首页展示（兼容不同 slug 配置）
   if (fileData.slug !== "index" && fileData.slug !== "") return null
 
   return (
@@ -33,17 +32,21 @@ TopicGraph.afterDOMDidLoad = `
     let graphInstance = null;
 
     const init = () => {
+      console.log("TopicGraph: 脚本开始运行...");
       const root = document.getElementById('topic-graph-root');
       const container = document.getElementById('topic-graph-container');
       const btn = document.getElementById('graph-maximize-btn');
       if (!root || !container || !btn) return;
 
       const render = () => {
-        if (typeof ForceGraph === 'undefined') return;
+        if (typeof ForceGraph === 'undefined') {
+          console.error("TopicGraph: ForceGraph 库未加载");
+          return;
+        }
         const status = document.getElementById('graph-status-text');
         if (status) status.style.display = 'none';
 
-        root.innerHTML = ''; // 清理容器
+        root.innerHTML = ''; 
         graphInstance = ForceGraph()(root)
           .graphData({
             nodes: Array.from(new Set([
@@ -56,7 +59,15 @@ TopicGraph.afterDOMDidLoad = `
           .nodeColor(() => '#ebd43f')
           .width(root.offsetWidth)
           .height(400)
-          .linkDirectionalParticles(2);
+          .linkDirectionalParticles(2)
+          .onLinkClick(link => {
+            const box = document.getElementById('idea-box');
+            const content = document.getElementById('idea-content');
+            if (box && content) {
+              content.innerText = link.idea || '暂无描述';
+              box.style.display = 'block';
+            }
+          });
 
         btn.onclick = (e) => {
           e.preventDefault();
@@ -65,7 +76,8 @@ TopicGraph.afterDOMDidLoad = `
           setTimeout(() => {
             graphInstance.width(isMax ? window.innerWidth : container.offsetWidth)
                          .height(isMax ? window.innerHeight : 400);
-          }, 150);
+            graphInstance.zoomToFit(400); // 全屏后自动缩放以适应节点
+          }, 200);
         };
       };
 
@@ -79,13 +91,12 @@ TopicGraph.afterDOMDidLoad = `
       }
     };
 
-    // 处理 Quartz 的 SPA 导航
     document.addEventListener("nav", init);
     init();
   })();
 `
 
-// 注意：这里的反引号在样式结束后立即关闭
+// --- 关键点：这里的反引号必须在 export 之前闭合 ---
 TopicGraph.css = `
 .topic-graph-container.maximized {
   position: fixed !important;
@@ -93,7 +104,7 @@ TopicGraph.css = `
   width: 100vw !important; 
   height: 100vh !important;
   z-index: 999999 !important; 
-  background: var(--light) !important;
+  background: #1a1b1e !important; /* 强制暗色背景适配图谱 */
   margin: 0 !important;
   border-radius: 0 !important;
 }
@@ -101,12 +112,12 @@ TopicGraph.css = `
   position: absolute;
   top: 20px; right: 20px;
   z-index: 1000000;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(5px);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
   padding: 10px;
   border-radius: 8px;
 }
 `
 
-// 这里的导出语句必须保持在最外层，不能被任何反引号包裹
+// 导出语句必须在最外层
 export default (() => TopicGraph) satisfies QuartzComponentConstructor
