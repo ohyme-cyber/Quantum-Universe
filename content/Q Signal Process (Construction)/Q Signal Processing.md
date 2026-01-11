@@ -1,5 +1,5 @@
 ---
-title: Quantum Signal Processing (to Construct Operators)
+title: Q Signal Processing (to Construct Operators)
 tags:
   - Q-Signal-Processing
   - Designed-M
