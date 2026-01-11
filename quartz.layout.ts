@@ -26,7 +26,7 @@ export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   header: [],
   footer: Component.Footer({
-    links: { GitHub: "https://github.com/ohyme-cyber/Quantum-Universe" },
+    links: { GitHub: "https://github.com/ohyme-cyber/Quantum-Universe","League of Legends": "https://op.gg/zh-cn/lol/summoners/tw/Ohyme-tw2" }
   }),
   // 全局组件放在这里没问题，因为我们已经在组件内部写了“非主页即消失”的逻辑
   afterBody: [Component.GlobalTags(), Component.TopicGraph()], 
