@@ -14,5 +14,7 @@ GSE 一般会在如下场景中emerge出来：
 
 Example:
 1. Global H satisfies all k-th non-resonance conditions but is time-independent, then $E$ is the global conserved quantity. If measurement basis is energy non-revealing, then $\mathcal{E}=\mathcal{E}_{Scrooge}[\rho_{Gibbs}]$. While if the measurement basis is energy revealing, then $\mathcal{E}=\sum_{x_{B}}p(x_{B})\mathcal{E}_{Scrooge}[\rho_{x_{B}}]$, where ![[Pasted image 20260115160502.png]]
-		Reference: https://arxiv.org/pdf/2403.11970
-2.  
+Reference: https://arxiv.org/pdf/2403.11970
+2.  ![[Pasted image 20260115160616.png]]
+![[Pasted image 20260115160711.png]]
+Reference:  https://journals.aps.org/prxquantum/pdf/10.1103/PRXQuantum.6.020343
