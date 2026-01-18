@@ -14,4 +14,5 @@ date: 2026-01-18
 不知道以后会不会用上。。。
 Reference: https://arxiv.org/pdf/2509.16036
 
-不知道能不能把  中的关于Emergent Scrooge中必要ingredient 中的scramble替换成
+不知道能不能把 https://arxiv.org/pdf/2601.00266 中的关于Emergent Scrooge中必要ingredient 中的scramble替换成这个？即：需要足够高的Wehrl熵密度。。。
+![[Pasted image 20260118124303.png]]
