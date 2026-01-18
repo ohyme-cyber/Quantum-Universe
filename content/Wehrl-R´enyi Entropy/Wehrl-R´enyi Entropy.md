@@ -2,6 +2,7 @@
 title: Wehrl-R´enyi Entropy
 tags:
   - Multipartite-Entanglement
+  - Minimal-M
 date: 2026-01-18
 ---
 ![[Pasted image 20260118123319.png]]
