@@ -15,6 +15,10 @@ date: 2026-01-15
 ---
 
 ## 1. 系统参数与测量基底 (Measurement Basis)
+全局输入态：$|\Psi_0\rangle = |+\rangle^{\otimes \alpha_0 N} \otimes |0\rangle^{\otimes (1-\alpha_0) N}$
+
+动力学：Random Permutation Dynamics，Coherence-Free
+
 系统 B 的测量环境由两类基底组成：
 - **Z basis**: 占比 $(1 - \alpha_m) N_B$ —— **基底揭示型** (Basis-revealing)，提供硬约束。
 - **X basis**: 占比 $\alpha_m N_B$ —— **相干保留型** (Non-revealing)，允许路径干涉。
@@ -44,7 +48,7 @@ $$l_A \sim 2^{\alpha_0 N} \cdot 2^{-(1 - \alpha_m) N_B} = 2^{\alpha_0 N_A + (\al
 - **IPR (Inverse Participation Ratio)**:
     - **Computational Basis**: IPR 显著较大（接近 1），反映态的局域化。
     - **Haar Ensemble**: IPR 极小（$O(1/d_A)$），反映态的全局弥散。
-    - *结论：IPR 是观测相变最直观的物理量。*
+    - *所以 IPR 也是观测相变最直观的物理量。*
 
 ---
 
@@ -53,7 +57,5 @@ $$l_A \sim 2^{\alpha_0 N} \cdot 2^{-(1 - \alpha_m) N_B} = 2^{\alpha_0 N_A + (\al
 $$H_2(\cos^2 \frac{\theta_0}{2}) + H_2(\cos^2 \frac{\theta_m}{2}) = \ln 2$$
 这完美验证了笔记中提到的：**相干性在不同基底下不同，但其总量守恒并决定相变边界。**
 
-#QuantumDynamics #DeepThermalization #ResourceTheory #ObsidianNote
+（注意：对同一个态而言， Coherence 在不同的基底下的值不同）
 
-
-![[b417eae78b065e0b18a464d78b0c2680.jpg]]
