@@ -28,3 +28,4 @@ $$\rho = \begin{bmatrix} \tilde{\rho}_+ & B \\ B^\dagger & \tilde{\rho}_- \end{b
 	2. 分治（Divide and Conquer）：一旦变换到了 $Z_1$ 形式，希尔伯特空间就自然裂开了：块 1 (+1)： 第1个比特固定为 $|0\rangle$，剩下的 $N-1$ 个比特构成一个自由度。块 2 (-1)： 第1个比特固定为 $|1\rangle$，剩下的 $N-1$ 个比特构成另一个自由度。
 	3. 随机化（Randomization）：现在，“块内随机”变得非常简单——只需要对剩下的 $N-1$ 个比特施加随机幺正演化 $U'$ 即可。第1个比特保持不动（或者只用来做测量标记）。
 	![[Pasted image 20260119000110.png]]
+Reference: https://arxiv.org/pdf/2505.09206
