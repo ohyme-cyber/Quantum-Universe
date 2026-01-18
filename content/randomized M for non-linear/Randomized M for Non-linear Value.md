@@ -7,7 +7,9 @@ title: Randomized M for Non-linear Value
 date: 2026-01-18
 ---
 1. 本文目标：
-![[Pasted image 20260118233812.png]]
+	$\text{Tr}(O\rho^2)$ 
+	其物理意义最直观的理解是：它是经过“虚拟蒸馏”后的量子态期望值（的分子部分）。在含噪量子计算（NISQ）时代，我们制备的量子态 $\rho$ 通常包含噪声（即它是混合态）。而在理想情况下，我们希望制备的是纯态 $|\psi\rangle\langle\psi|$（即 $\rho_{\text{ideal}}$）。通常噪声会让 $\rho$ 变得“浑浊”（混合度增加），但主要的信号成分往往对应于 $\rho$ 中概率最大的那个本征态（即主成分）。虚拟蒸馏 (Virtual Distillation) / 虚拟冷却 (Virtual Cooling):如果我们能计算 $\frac{\text{Tr}(O\rho^2)}{\text{Tr}(\rho^2)}$，这实际上等价于在一个更纯的态 $\rho' = \frac{\rho^2}{\text{Tr}(\rho^2)}$ 上测量观测算符 $O$ 的期望值。$\rho^2$ 会压制小的本征值（噪声），放大大的本征值（信号）。因此，$\text{Tr}(O\rho^2)$ 是实现这种误差缓解的核心计算量，它可以让我们在有噪声的硬件上“模拟”出更低温度（更少噪声）的物理结果。
+	
 2. 传统Randomized Measurement：$\mathrm{Tr}(\rho^2)$
 
 	对 $\rho$ 施加一个 $U\sim Haar$, 如果是纯态，其在随机基底下的概率分布会涨落大；反之如果是 $\rho\sim I$, 概率分布涨落会很小，因此可以利用其二阶矩来估算纯度。
