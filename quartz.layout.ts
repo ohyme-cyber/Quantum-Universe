@@ -46,7 +46,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Darkmode(),
     Component.RecentNotes({
       title: "Recently",
-      limit: 20,
+      limit: 200,
       showTags: false, // 侧边栏保持干净
     }),
   ],
