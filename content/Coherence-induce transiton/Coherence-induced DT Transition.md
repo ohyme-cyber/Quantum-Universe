@@ -6,6 +6,7 @@ tags:
   - Projected-Ensemble
   - Computational-Basis-Ensemble
   - Haar-Ensemble
+  - Minimal-M
 date: 2026-01-15
 ---
 # RPD 模型：相干性诱导的深层热化 (Note 2026-01-03)
