@@ -34,7 +34,7 @@ QET 是一种利用**量子纠缠**和**经典通信 (LOCC)**，在空间分离�
 $$
 W_{ext} \le -\Delta F + k_B T \cdot I_{QC}(M:B)
 $$
-
+$$I_{QC}(M : B) \equiv S(\rho_B) - \sum_k p_k S(\rho_B^{(k)})$$ (很像Holevo Bound但不是！)
 > [!math] 物理直觉
 > 信息 $I$ 扮演了负熵的角色。Alice 的测量打破了纠缠的对称性，Bob 利用信息 $I$ 可以在原本看起来杂乱无章（高熵）的真空/热态中找到做功的路径。
 
