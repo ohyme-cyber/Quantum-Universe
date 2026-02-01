@@ -62,6 +62,18 @@ I_{acc}(\mathcal{E}) \equiv \max_{\mathcal{M}} I(K : Y)
 $$
 即：Alice 的笔记本上的 $k$ 和 Bob 测量出来的 $Y$ 之间的经典关联。
 
+
+
+---
+## 具体场景
+ 投影系综与经典态（measurement basis）的拼接态：
+ $$\rho_{AB}=\sum_{Z_{B}} p(Z_{B})\rho_{A}(Z_{B})\otimes  \ket{Z_{B}} \bra{Z_{B}} $$
+ 则量子关联
+ $$I(A:B)=S(\rho_{A})-\sum_{Z_{B}}p(Z_{B})S(\rho_{A}(Z_{B}))=\chi (\mathcal{E}_{proj})$$
+ 而你对投影系综做测量所得到的互信息与Accessible Information，都是  $I(Z_{A}:Z_{B})$，相当于是在用经典变量来尝试刻画量子关联，那么显然会有
+ $$I(Z_{A}:Z_{B})\leq \chi(\mathcal{E}_{proj}), \,\ \forall \,\ Z_{A}.$$
+
+
 ---
 
 ## 4. 核心定理：Holevo Bound
