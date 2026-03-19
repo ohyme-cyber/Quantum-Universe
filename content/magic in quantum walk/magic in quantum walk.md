@@ -1,7 +1,10 @@
 ---
 title: 离散时间量子行走中的量子魔力 (arXiv:2506.17783)
 authors: Vikash Mittal, Yi-Ping Huang
-tags: [Quantum-Walk, Quantum-Magic, Resource-Theory, Entanglement, Integrability]
+tags:
+  - Quantum-Walk
+  - Magic
+  - Designed-M
 arXiv: https://arxiv.org/abs/2506.17783
 date: 2026-03-19
 ---
