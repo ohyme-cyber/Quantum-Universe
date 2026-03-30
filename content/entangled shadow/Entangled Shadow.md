@@ -2,11 +2,9 @@
 title: Auxiliary-Free Replica Shadows (AFRS)
 date: 2026-03-30
 tags:
-  - literature-note
-  - quantum-information
   - classical-shadows
-  - MIPT
-  - NISQ
+  - entangled-measurement
+  - Minimal-M
 authors: Xiao Yuan, You Zhou, Huangjun Zhu
 year: 2024
 ---
@@ -28,7 +26,8 @@ year: 2024
 为了估计 $\text{Tr}(\rho^2)$，AFRS 需要制备 $t=2$ 个相同的量子态副本。
 
 
-
+![[Pasted image 20260330210548.png]]
+![[Pasted image 20260330210725.png]]
 
 ### 协议步骤
 1. **制备副本：** 初始化双副本态 $\rho \otimes \rho$。
