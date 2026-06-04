@@ -1,5 +1,11 @@
-# $D_3$-对称 Haar 系综的高阶矩与相对 Scrooge-design
-
+---
+title: " $D_3$-对称 Haar 系综的高阶矩与相对 Scrooge-design"
+date: 2026-06-04
+tags:
+  - D3-symmetry
+  - Calculation
+  - Tutorial
+---
 ## 直接矩比较法：中文学习笔记
 
 > **用途**：这是一份用于边读边提问的教学笔记。它聚焦于“写出两个系综的 $t$ 阶矩公式，并在共同分块上直接比较”的证明路线。
