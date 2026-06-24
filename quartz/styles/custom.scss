@@ -96,6 +96,15 @@ li {
     min-height: 360px;
     background: rgba(0, 0, 0, 0.035);
     position: relative;
+
+    svg {
+      cursor: grab;
+      touch-action: none;
+    }
+  }
+
+  &.is-panning #topic-graph-root svg {
+    cursor: grabbing;
   }
 
   #graph-status-text {
@@ -178,7 +187,6 @@ li {
       fill: var(--dark);
       font-size: 0.78rem;
       text-anchor: middle;
-      transform: translateY(-14px);
       opacity: 0;
       paint-order: stroke;
       stroke: var(--light);
@@ -195,8 +203,14 @@ li {
     }
     &:hover text,
     &.is-active text,
+    &.is-readable text,
     &:focus-visible text {
       opacity: 1;
+    }
+
+    &.is-readable:not(:hover):not(.is-active):not(:focus-visible) text {
+      fill: var(--darkgray);
+      opacity: 0.92;
     }
   }
 

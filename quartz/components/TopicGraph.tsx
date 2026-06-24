@@ -93,6 +93,10 @@ TopicGraph.afterDOMLoaded = `
     return topicGraphPalette[topicGraphHash(topic) % topicGraphPalette.length];
   }
 
+  function topicGraphClamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+
   function topicGraphRenderLegend(container, nodes) {
     const legend = document.createElement("div");
     legend.className = "topic-graph-legend";
@@ -177,11 +181,14 @@ TopicGraph.afterDOMLoaded = `
     svg.setAttribute("aria-label", "课题关联图谱");
     root.appendChild(svg);
 
+    const viewport = document.createElementNS(topicGraphSvgNS, "g");
+    viewport.setAttribute("class", "topic-graph-viewport");
     const linkLayer = document.createElementNS(topicGraphSvgNS, "g");
     const hitLayer = document.createElementNS(topicGraphSvgNS, "g");
     const labelLayer = document.createElementNS(topicGraphSvgNS, "g");
     const nodeLayer = document.createElementNS(topicGraphSvgNS, "g");
-    svg.append(linkLayer, hitLayer, labelLayer, nodeLayer);
+    viewport.append(linkLayer, hitLayer, labelLayer, nodeLayer);
+    svg.appendChild(viewport);
 
     const nodeById = new Map();
     for (const link of links) {
@@ -211,6 +218,70 @@ TopicGraph.afterDOMLoaded = `
       targetNode: positionedNodeById.get(link.target),
     }));
     const legend = topicGraphRenderLegend(container, nodes);
+
+    let viewScale = 1;
+    let viewX = 0;
+    let viewY = 0;
+    let panState = null;
+
+    function applyViewportTransform() {
+      viewport.setAttribute(
+        "transform",
+        "translate(" + viewX + " " + viewY + ") scale(" + viewScale + ")",
+      );
+      updateReadableLabels();
+    }
+
+    function zoomAt(clientX, clientY, nextScale) {
+      const rect = svg.getBoundingClientRect();
+      const pointerX = clientX - rect.left;
+      const pointerY = clientY - rect.top;
+      const graphX = (pointerX - viewX) / viewScale;
+      const graphY = (pointerY - viewY) / viewScale;
+      viewScale = topicGraphClamp(nextScale, 0.7, 4);
+      viewX = pointerX - graphX * viewScale;
+      viewY = pointerY - graphY * viewScale;
+      applyViewportTransform();
+    }
+
+    function handleWheel(event) {
+      event.preventDefault();
+      const factor = Math.exp(-event.deltaY * 0.0012);
+      zoomAt(event.clientX, event.clientY, viewScale * factor);
+    }
+
+    function handlePointerDown(event) {
+      if (event.button !== 0 || event.target !== svg) return;
+      panState = {
+        id: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        viewX,
+        viewY,
+      };
+      svg.setPointerCapture(event.pointerId);
+      container.classList.add("is-panning");
+    }
+
+    function handlePointerMove(event) {
+      if (!panState || event.pointerId !== panState.id) return;
+      viewX = panState.viewX + event.clientX - panState.startX;
+      viewY = panState.viewY + event.clientY - panState.startY;
+      applyViewportTransform();
+    }
+
+    function finishPan(event) {
+      if (!panState || event.pointerId !== panState.id) return;
+      panState = null;
+      container.classList.remove("is-panning");
+      if (svg.hasPointerCapture(event.pointerId)) svg.releasePointerCapture(event.pointerId);
+    }
+
+    svg.addEventListener("wheel", handleWheel, { passive: false });
+    svg.addEventListener("pointerdown", handlePointerDown);
+    svg.addEventListener("pointermove", handlePointerMove);
+    svg.addEventListener("pointerup", finishPan);
+    svg.addEventListener("pointercancel", finishPan);
 
     function moveTooltip(event) {
       const bounds = container.getBoundingClientRect();
@@ -326,6 +397,7 @@ TopicGraph.afterDOMLoaded = `
       group.appendChild(circle);
 
       const label = document.createElementNS(topicGraphSvgNS, "text");
+      label.setAttribute("y", "-14");
       label.textContent = node.id;
       group.appendChild(label);
 
@@ -356,8 +428,40 @@ TopicGraph.afterDOMLoaded = `
         }
       });
 
-      return { node, group };
+      return { node, group, label };
     });
+
+    function syncNodeLabelScale() {
+      const safeScale = Math.max(viewScale, 0.7);
+      for (const item of nodeEls) {
+        item.label.style.fontSize = 12 / safeScale + "px";
+        item.label.style.strokeWidth = 5 / safeScale + "px";
+        item.label.setAttribute("y", String(-14 / safeScale));
+      }
+    }
+
+    function nearestScreenDistance(node) {
+      if (nodes.length < 2) return Infinity;
+      let nearest = Infinity;
+      for (const other of nodes) {
+        if (other === node) continue;
+        const dx = other.x - node.x;
+        const dy = other.y - node.y;
+        nearest = Math.min(nearest, Math.sqrt(dx * dx + dy * dy) * viewScale);
+      }
+      return nearest;
+    }
+
+    function updateReadableLabels() {
+      if (!nodeEls.length) return;
+      syncNodeLabelScale();
+      for (const item of nodeEls) {
+        const textWidth = item.label.getComputedTextLength() * viewScale;
+        const neededSpace = topicGraphClamp(textWidth + 42, 112, 220);
+        const hasRoom = nearestScreenDistance(item.node) >= neededSpace;
+        item.group.classList.toggle("is-readable", hasRoom);
+      }
+    }
 
     function renderPositions() {
       for (const item of linkEls) {
@@ -378,6 +482,8 @@ TopicGraph.afterDOMLoaded = `
       for (const item of nodeEls) {
         item.group.setAttribute("transform", "translate(" + item.node.x + " " + item.node.y + ")");
       }
+
+      updateReadableLabels();
     }
 
     let alpha = 1;
@@ -457,6 +563,11 @@ TopicGraph.afterDOMLoaded = `
       stopped = true;
       window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", rerenderSoon);
+      svg.removeEventListener("wheel", handleWheel);
+      svg.removeEventListener("pointerdown", handlePointerDown);
+      svg.removeEventListener("pointermove", handlePointerMove);
+      svg.removeEventListener("pointerup", finishPan);
+      svg.removeEventListener("pointercancel", finishPan);
       tooltip.remove();
       legend.remove();
     };
