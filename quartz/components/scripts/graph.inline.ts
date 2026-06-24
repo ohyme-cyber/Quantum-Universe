@@ -98,15 +98,28 @@ function graphTopicName(node: NodeData): string | null {
 function renderGraphTopicLegend(graph: HTMLElement, topics: string[]) {
   if (topics.length === 0) return
 
-  const legend = document.createElement("div")
+  const sortedTopics = [...topics].sort((a, b) => a.localeCompare(b))
+  const legend = document.createElement("details")
   legend.className = "graph-topic-legend"
+  legend.open = graph.classList.contains("global-graph-container") || sortedTopics.length <= 12
 
-  const title = document.createElement("div")
-  title.className = "graph-topic-legend-title"
+  const summary = document.createElement("summary")
+  summary.className = "graph-topic-legend-summary"
+
+  const title = document.createElement("span")
   title.textContent = "Topics"
-  legend.appendChild(title)
 
-  for (const topic of [...topics].sort((a, b) => a.localeCompare(b))) {
+  const count = document.createElement("span")
+  count.className = "graph-topic-legend-count"
+  count.textContent = String(sortedTopics.length)
+
+  summary.append(title, count)
+  legend.appendChild(summary)
+
+  const list = document.createElement("div")
+  list.className = "graph-topic-legend-list"
+
+  for (const topic of sortedTopics) {
     const item = document.createElement("div")
     item.className = "graph-topic-legend-item"
 
@@ -119,9 +132,10 @@ function renderGraphTopicLegend(graph: HTMLElement, topics: string[]) {
     label.textContent = topic
 
     item.append(swatch, label)
-    legend.appendChild(item)
+    list.appendChild(item)
   }
 
+  legend.appendChild(list)
   graph.appendChild(legend)
 }
 

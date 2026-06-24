@@ -98,15 +98,28 @@ TopicGraph.afterDOMLoaded = `
   }
 
   function topicGraphRenderLegend(container, nodes) {
-    const legend = document.createElement("div");
+    const sortedNodes = [...nodes].sort((a, b) => a.id.localeCompare(b.id));
+    const legend = document.createElement("details");
     legend.className = "topic-graph-legend";
+    legend.open = sortedNodes.length <= 12;
 
-    const title = document.createElement("div");
-    title.className = "topic-graph-legend-title";
+    const summary = document.createElement("summary");
+    summary.className = "topic-graph-legend-summary";
+
+    const title = document.createElement("span");
     title.textContent = "Topics";
-    legend.appendChild(title);
 
-    for (const node of [...nodes].sort((a, b) => a.id.localeCompare(b.id))) {
+    const count = document.createElement("span");
+    count.className = "topic-graph-legend-count";
+    count.textContent = String(sortedNodes.length);
+
+    summary.append(title, count);
+    legend.appendChild(summary);
+
+    const list = document.createElement("div");
+    list.className = "topic-graph-legend-list";
+
+    for (const node of sortedNodes) {
       const item = document.createElement("div");
       item.className = "topic-graph-legend-item";
 
@@ -119,9 +132,10 @@ TopicGraph.afterDOMLoaded = `
       label.textContent = node.id;
 
       item.append(swatch, label);
-      legend.appendChild(item);
+      list.appendChild(item);
     }
 
+    legend.appendChild(list);
     container.appendChild(legend);
     return legend;
   }
