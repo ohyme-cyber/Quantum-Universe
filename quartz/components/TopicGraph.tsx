@@ -131,7 +131,9 @@ TopicGraph.afterDOMLoaded = `
           active.classList.remove("is-selected");
         }
         item.classList.add("is-selected");
-        onSelectTopic(node.id);
+        if (onSelectTopic(node.id)) {
+          legend.open = false;
+        }
       });
 
       const swatch = document.createElement("span");
@@ -513,7 +515,7 @@ TopicGraph.afterDOMLoaded = `
 
     function focusTopicNode(topic) {
       const item = nodeEls.find((entry) => entry.node.id === topic);
-      if (!item) return;
+      if (!item) return false;
 
       if (focusedNodeEl) focusedNodeEl.classList.remove("is-focused");
       focusedNodeEl = item.group;
@@ -527,6 +529,7 @@ TopicGraph.afterDOMLoaded = `
       );
       container.dataset.focusScale = String(nextScale);
       animateViewportTo(width / 2 - item.node.x * nextScale, height / 2 - item.node.y * nextScale, nextScale);
+      return true;
     }
 
     function renderPositions() {

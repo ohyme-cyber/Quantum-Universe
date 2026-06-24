@@ -78,6 +78,16 @@ const graphTopicPalette = [
   "#8bd17c",
 ]
 
+const graphClassificationLabels = new Set([
+  "minimal-m",
+  "designed-m",
+  "tutorial",
+  "algorithm",
+  "calculation",
+  "ml",
+  "statistics",
+])
+
 function graphTopicHash(value: string): number {
   let hash = 0
   for (let i = 0; i < value.length; i++) {
@@ -95,14 +105,22 @@ function graphTopicName(node: NodeData): string | null {
   return node.tags[0] ?? null
 }
 
+function graphTopicKind(topic: string): "classification" | "topic" {
+  return graphClassificationLabels.has(topic.toLowerCase()) ? "classification" : "topic"
+}
+
 function renderGraphTopicLegend(
   graph: HTMLElement,
   topics: string[],
-  onSelectTopic: (topic: string) => void,
+  onSelectTopic: (topic: string) => boolean,
 ) {
   if (topics.length === 0) return
 
   const sortedTopics = [...topics].sort((a, b) => a.localeCompare(b))
+  const groupedTopics = {
+    classification: sortedTopics.filter((topic) => graphTopicKind(topic) === "classification"),
+    topic: sortedTopics.filter((topic) => graphTopicKind(topic) === "topic"),
+  }
   const legend = document.createElement("details")
   legend.className = "graph-topic-legend"
   legend.open = graph.classList.contains("global-graph-container") || sortedTopics.length <= 12
@@ -111,7 +129,7 @@ function renderGraphTopicLegend(
   summary.className = "graph-topic-legend-summary"
 
   const title = document.createElement("span")
-  title.textContent = "Topics"
+  title.textContent = "Legend"
 
   const count = document.createElement("span")
   count.className = "graph-topic-legend-count"
@@ -120,37 +138,56 @@ function renderGraphTopicLegend(
   summary.append(title, count)
   legend.appendChild(summary)
 
-  const list = document.createElement("div")
-  list.className = "graph-topic-legend-list"
+  function appendSection(sectionTitle: string, sectionTopics: string[]) {
+    if (sectionTopics.length === 0) return
 
-  for (const topic of sortedTopics) {
-    const item = document.createElement("button")
-    item.className = "graph-topic-legend-item"
-    item.type = "button"
-    item.dataset.topic = topic
-    item.addEventListener("click", (event) => {
-      event.preventDefault()
-      event.stopPropagation()
-      for (const active of list.querySelectorAll(".graph-topic-legend-item.is-selected")) {
-        active.classList.remove("is-selected")
-      }
-      item.classList.add("is-selected")
-      onSelectTopic(topic)
-    })
+    const section = document.createElement("div")
+    section.className = "graph-topic-legend-section"
 
-    const swatch = document.createElement("span")
-    swatch.className = "graph-topic-legend-swatch"
-    swatch.style.backgroundColor = graphTopicColor(topic)
+    const heading = document.createElement("div")
+    heading.className = "graph-topic-legend-section-title"
+    heading.textContent = sectionTitle
+    section.appendChild(heading)
 
-    const label = document.createElement("span")
-    label.className = "graph-topic-legend-label"
-    label.textContent = topic
+    const list = document.createElement("div")
+    list.className = "graph-topic-legend-list"
 
-    item.append(swatch, label)
-    list.appendChild(item)
+    for (const topic of sectionTopics) {
+      const item = document.createElement("button")
+      item.className = "graph-topic-legend-item"
+      item.type = "button"
+      item.dataset.topic = topic
+      item.dataset.kind = graphTopicKind(topic)
+      item.addEventListener("click", (event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        for (const active of legend.querySelectorAll(".graph-topic-legend-item.is-selected")) {
+          active.classList.remove("is-selected")
+        }
+        item.classList.add("is-selected")
+        if (onSelectTopic(topic)) {
+          legend.open = false
+        }
+      })
+
+      const swatch = document.createElement("span")
+      swatch.className = "graph-topic-legend-swatch"
+      swatch.style.backgroundColor = graphTopicColor(topic)
+
+      const label = document.createElement("span")
+      label.className = "graph-topic-legend-label"
+      label.textContent = topic
+
+      item.append(swatch, label)
+      list.appendChild(item)
+    }
+
+    section.appendChild(list)
+    legend.appendChild(section)
   }
 
-  legend.appendChild(list)
+  appendSection("Classification", groupedTopics.classification)
+  appendSection("Topics", groupedTopics.topic)
   graph.appendChild(legend)
 }
 
@@ -251,6 +288,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
         target: nodes.find((n) => n.id === l.target)!,
       })),
   }
+  const isGlobalGraph = graph.classList.contains("global-graph-container")
   const visibleLegendTopics = [
     ...new Set(
       graphData.nodes
@@ -259,7 +297,8 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     ),
   ]
   const fallbackLegendTopics = tags.map((tag) => (tag.startsWith("tags/") ? tag.substring(5) : tag))
-  const legendTopics = visibleLegendTopics.length > 0 ? visibleLegendTopics : fallbackLegendTopics
+  const legendTopics =
+    visibleLegendTopics.length > 0 ? visibleLegendTopics : isGlobalGraph ? fallbackLegendTopics : []
 
   const width = graph.offsetWidth
   const height = Math.max(graph.offsetHeight, 250)
@@ -572,7 +611,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     }
   }
 
-  function focusGraphTopic(topic: string) {
+  function focusGraphTopic(topic: string): boolean {
     const tagId = simplifySlug(("tags/" + topic) as FullSlug)
     const normalizedTagId = tagId.toLowerCase()
     const normalizedTopic = topic.toLowerCase()
@@ -584,7 +623,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     if (!target) {
       delete graph.dataset.focusedTopic
       delete graph.dataset.focusedNode
-      return
+      return false
     }
 
     updateHoverInfo(target.simulationData.id)
@@ -604,6 +643,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     graph.dataset.focusScale = String(nextScale)
     select<HTMLCanvasElement, NodeData>(app.canvas).property("__zoom", nextTransform)
     applyGraphTransform(nextTransform)
+    return true
   }
 
   renderGraphTopicLegend(graph, legendTopics, focusGraphTopic)
