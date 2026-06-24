@@ -195,24 +195,31 @@ TopicGraph.afterDOMLoaded = `
 
       const hit = document.createElementNS(topicGraphSvgNS, "line");
       hit.setAttribute("class", "topic-link-hit");
-      hit.setAttribute("tabindex", "0");
-      hit.setAttribute("role", "link");
-      hit.setAttribute("aria-label", link.source + " 到 " + link.target + " 的研究关联");
       hitLayer.appendChild(hit);
 
       const label = document.createElementNS(topicGraphSvgNS, "text");
       label.setAttribute("class", "topic-link-label");
-      label.textContent = topicGraphLinkLabel(link).slice(0, 56);
+      label.setAttribute("tabindex", "0");
+      label.setAttribute("role", "link");
+      label.setAttribute("aria-label", link.source + " 到 " + link.target + " 的研究关联");
+      label.textContent = (topicGraphLinkLabel(link) || link.source + " ↔ " + link.target).slice(
+        0,
+        56,
+      );
       labelLayer.appendChild(label);
 
-      hit.addEventListener("pointerenter", (event) => showLinkTooltip(link, event));
-      hit.addEventListener("pointermove", moveTooltip);
-      hit.addEventListener("pointerleave", hideTooltip);
-      hit.addEventListener("click", () => topicGraphRouteTo(link.page || link.href || link.url));
-      hit.addEventListener("keydown", (event) => {
+      const openLink = () => topicGraphRouteTo(link.page || link.href || link.url);
+      for (const target of [hit, label]) {
+        target.addEventListener("pointerenter", (event) => showLinkTooltip(link, event));
+        target.addEventListener("pointermove", moveTooltip);
+        target.addEventListener("pointerleave", hideTooltip);
+        target.addEventListener("click", openLink);
+      }
+
+      label.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          topicGraphRouteTo(link.page || link.href || link.url);
+          openLink();
         }
       });
 
