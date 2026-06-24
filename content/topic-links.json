@@ -2,6 +2,8 @@
   {
     "source": "M-Induced",
     "target": "Dual-Circuit",
-    "idea": "对偶电路可以提供研究测量诱导相变的解析模型。"
+    "title": "对偶电路作为测量诱导相变的解析模型",
+    "idea": "对偶电路可以提供研究测量诱导相变的解析模型。",
+    "page": "topic-relations/M-Induced-Dual-Circuit"
   }
 ]

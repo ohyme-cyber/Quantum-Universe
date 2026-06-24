@@ -602,7 +602,7 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
       container.classList.add("active")
       const sidebar = container.closest(".sidebar") as HTMLElement
       if (sidebar) {
-        sidebar.style.zIndex = "1"
+        sidebar.style.zIndex = "200000"
       }
 
       const graphContainer = container.querySelector(".global-graph-container") as HTMLElement
