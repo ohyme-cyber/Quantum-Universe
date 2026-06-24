@@ -1,11 +1,11 @@
 import { QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { classNames } from "../util/lang"
-import topicLinks from "../../content/topic-links.json"
+import { getTopicRelationData } from "./topicRelations"
 
-const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
+const TopicGraph = ({ allFiles, displayClass, fileData }: QuartzComponentProps) => {
   // 只在首页显示
   if (fileData.slug !== "index" && fileData.slug !== "") return null
-  const topicLinksJson = JSON.stringify(topicLinks).replace(/</g, "\\u003c")
+  const topicLinksJson = JSON.stringify(getTopicRelationData(allFiles)).replace(/</g, "\\u003c")
 
   return (
     <div id="topic-graph-container" className={classNames(displayClass, "topic-graph-container")}>
@@ -62,7 +62,7 @@ TopicGraph.afterDOMLoaded = `
   }
 
   function topicGraphLinkLabel(link) {
-    return link.title || link.result || link.idea || link.research || link.paper || "";
+    return link.title || link.summary || link.result || link.idea || link.research || link.paper || "";
   }
 
   const topicGraphPalette = [
@@ -166,14 +166,27 @@ TopicGraph.afterDOMLoaded = `
     if (!container || !root || !dataEl) return;
 
     let links = [];
+    let explicitNodes = [];
     try {
       const parsed = JSON.parse(dataEl.textContent || "[]");
-      links = Array.isArray(parsed) ? parsed : [];
+      if (Array.isArray(parsed)) {
+        links = parsed;
+      } else {
+        links = Array.isArray(parsed.links) ? parsed.links : [];
+        explicitNodes = Array.isArray(parsed.nodes) ? parsed.nodes : [];
+      }
     } catch (err) {
-      root.innerHTML = '<p id="graph-status-text">topic-links.json 解析失败，请检查 JSON 格式。</p>';
-      console.warn("[TopicGraph] Invalid topic-links.json", err);
+      root.innerHTML = '<p id="graph-status-text">课题关联数据解析失败，请检查 relation 笔记的 properties。</p>';
+      console.warn("[TopicGraph] Invalid topic relation data", err);
       return;
     }
+
+    explicitNodes = explicitNodes
+      .filter((node) => node && node.id)
+      .map((node) => ({
+        ...node,
+        id: String(node.id),
+      }));
 
     links = links
       .filter((link) => link && link.source && link.target)
@@ -185,8 +198,8 @@ TopicGraph.afterDOMLoaded = `
       }));
 
     root.innerHTML = "";
-    if (links.length === 0) {
-      root.innerHTML = '<p id="graph-status-text">还没有研究关联。请在 content/topic-links.json 中添加 source / target / idea / page。</p>';
+    if (links.length === 0 && explicitNodes.length === 0) {
+      root.innerHTML = '<p id="graph-status-text">还没有课题数据。请在 Obsidian 中添加 topic-relation 或 topic-node 笔记。</p>';
       return;
     }
 
@@ -218,6 +231,10 @@ TopicGraph.afterDOMLoaded = `
     svg.appendChild(viewport);
 
     const nodeById = new Map();
+    for (const node of explicitNodes) {
+      nodeById.set(node.id, { ...node, degree: 0 });
+    }
+
     for (const link of links) {
       if (!nodeById.has(link.source)) nodeById.set(link.source, { id: link.source, degree: 0 });
       if (!nodeById.has(link.target)) nodeById.set(link.target, { id: link.target, degree: 0 });
@@ -239,11 +256,13 @@ TopicGraph.afterDOMLoaded = `
     });
 
     const positionedNodeById = new Map(nodes.map((node) => [node.id, node]));
-    const graphLinks = links.map((link) => ({
-      ...link,
-      sourceNode: positionedNodeById.get(link.source),
-      targetNode: positionedNodeById.get(link.target),
-    }));
+    const graphLinks = links
+      .map((link) => ({
+        ...link,
+        sourceNode: positionedNodeById.get(link.source),
+        targetNode: positionedNodeById.get(link.target),
+      }))
+      .filter((link) => link.sourceNode && link.targetNode);
     const legend = topicGraphRenderLegend(container, nodes, focusTopicNode);
 
     let viewScale = 1;
@@ -352,10 +371,10 @@ TopicGraph.afterDOMLoaded = `
 
     function showLinkTooltip(link, event) {
       const title = topicGraphLinkLabel(link) || link.source + " ↔ " + link.target;
-      const body = link.idea || link.result || link.research || "暂无摘要。";
+      const body = link.summary || link.idea || link.result || link.research || "暂无摘要。";
       const detail = link.page || link.href || link.url
         ? '<div class="topic-graph-tooltip-hint">点击连线查看详情</div>'
-        : '<div class="topic-graph-tooltip-hint">在 JSON 中添加 page 后可跳转详情页</div>';
+        : '<div class="topic-graph-tooltip-hint">在 relation 笔记中添加详情页后可跳转</div>';
       tooltip.innerHTML =
         "<strong>" + topicGraphEscapeHtml(title) + "</strong>" +
         "<p>" + topicGraphEscapeHtml(body) + "</p>" +
@@ -365,9 +384,12 @@ TopicGraph.afterDOMLoaded = `
     }
 
     function showNodeTooltip(node, event) {
+      const targetHint = node.page
+        ? "点击节点可打开对应 topic 笔记。"
+        : "点击节点可打开对应 tag 页面。";
       tooltip.innerHTML =
-        "<strong>" + topicGraphEscapeHtml(node.id) + "</strong>" +
-        "<p>关联数：" + node.degree + "。点击节点可打开对应 tag 页面。</p>";
+        "<strong>" + topicGraphEscapeHtml(node.title || node.id) + "</strong>" +
+        "<p>" + topicGraphEscapeHtml(node.summary || ("关联数：" + node.degree + "。" + targetHint)) + "</p>";
       tooltip.hidden = false;
       moveTooltip(event);
     }
@@ -470,11 +492,12 @@ TopicGraph.afterDOMLoaded = `
       group.addEventListener("pointerleave", deactivateNode);
       group.addEventListener("focus", activateNodeFromFocus);
       group.addEventListener("blur", deactivateNode);
-      group.addEventListener("click", () => topicGraphRouteTo("tags/" + encodeURIComponent(node.id)));
+      const openNode = () => topicGraphRouteTo(node.page || "tags/" + encodeURIComponent(node.id));
+      group.addEventListener("click", openNode);
       group.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          topicGraphRouteTo("tags/" + encodeURIComponent(node.id));
+          openNode();
         }
       });
 
