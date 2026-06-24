@@ -12,7 +12,6 @@ const TopicGraph = ({ displayClass, fileData }: QuartzComponentProps) => {
       <div className="graph-header">
         <div>
           <h3>课题关联图谱</h3>
-          <p>topic 是节点，已有研究结果是连线；悬停连线查看摘要，点击进入详情。</p>
         </div>
         <button id="graph-maximize-btn" type="button" aria-expanded="false">
           全屏查看
@@ -64,6 +63,63 @@ TopicGraph.afterDOMLoaded = `
 
   function topicGraphLinkLabel(link) {
     return link.title || link.result || link.idea || link.research || link.paper || "";
+  }
+
+  const topicGraphPalette = [
+    "#e78a4e",
+    "#b37feb",
+    "#58c4a7",
+    "#e86f8a",
+    "#6ea8fe",
+    "#d9a441",
+    "#9ad66f",
+    "#f06b5f",
+    "#7cc7d6",
+    "#c58af9",
+    "#f2b880",
+    "#8bd17c",
+  ];
+
+  function topicGraphHash(value) {
+    let hash = 0;
+    const text = String(value);
+    for (let i = 0; i < text.length; i++) {
+      hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
+    }
+    return hash;
+  }
+
+  function topicGraphColor(topic) {
+    return topicGraphPalette[topicGraphHash(topic) % topicGraphPalette.length];
+  }
+
+  function topicGraphRenderLegend(container, nodes) {
+    const legend = document.createElement("div");
+    legend.className = "topic-graph-legend";
+
+    const title = document.createElement("div");
+    title.className = "topic-graph-legend-title";
+    title.textContent = "Topics";
+    legend.appendChild(title);
+
+    for (const node of [...nodes].sort((a, b) => a.id.localeCompare(b.id))) {
+      const item = document.createElement("div");
+      item.className = "topic-graph-legend-item";
+
+      const swatch = document.createElement("span");
+      swatch.className = "topic-graph-legend-swatch";
+      swatch.style.backgroundColor = node.color;
+
+      const label = document.createElement("span");
+      label.className = "topic-graph-legend-label";
+      label.textContent = node.id;
+
+      item.append(swatch, label);
+      legend.appendChild(item);
+    }
+
+    container.appendChild(legend);
+    return legend;
   }
 
   function topicGraphRender() {
@@ -140,6 +196,7 @@ TopicGraph.afterDOMLoaded = `
       const radius = Math.min(width, height) * 0.28;
       return {
         ...node,
+        color: topicGraphColor(node.id),
         x: width / 2 + Math.cos(angle) * radius,
         y: height / 2 + Math.sin(angle) * radius,
         vx: 0,
@@ -153,11 +210,21 @@ TopicGraph.afterDOMLoaded = `
       sourceNode: positionedNodeById.get(link.source),
       targetNode: positionedNodeById.get(link.target),
     }));
+    const legend = topicGraphRenderLegend(container, nodes);
 
     function moveTooltip(event) {
       const bounds = container.getBoundingClientRect();
       const x = Math.min(Math.max(event.clientX - bounds.left + 16, 12), bounds.width - 280);
       const y = Math.min(Math.max(event.clientY - bounds.top + 16, 12), bounds.height - 120);
+      tooltip.style.left = x + "px";
+      tooltip.style.top = y + "px";
+    }
+
+    function moveTooltipToElement(element) {
+      const bounds = container.getBoundingClientRect();
+      const rect = element.getBoundingClientRect();
+      const x = Math.min(Math.max(rect.left - bounds.left + rect.width / 2 + 16, 12), bounds.width - 280);
+      const y = Math.min(Math.max(rect.top - bounds.top + rect.height / 2 + 16, 12), bounds.height - 120);
       tooltip.style.left = x + "px";
       tooltip.style.top = y + "px";
     }
@@ -209,13 +276,32 @@ TopicGraph.afterDOMLoaded = `
       labelLayer.appendChild(label);
 
       const openLink = () => topicGraphRouteTo(link.page || link.href || link.url);
+      const activateLink = (event) => {
+        line.classList.add("is-active");
+        label.classList.add("is-active");
+        showLinkTooltip(link, event);
+      };
+      const activateLinkFromFocus = () => {
+        line.classList.add("is-active");
+        label.classList.add("is-active");
+        showLinkTooltip(link, { clientX: 0, clientY: 0 });
+        moveTooltipToElement(label);
+      };
+      const deactivateLink = () => {
+        line.classList.remove("is-active");
+        label.classList.remove("is-active");
+        hideTooltip();
+      };
+
       for (const target of [hit, label]) {
-        target.addEventListener("pointerenter", (event) => showLinkTooltip(link, event));
+        target.addEventListener("pointerenter", activateLink);
         target.addEventListener("pointermove", moveTooltip);
-        target.addEventListener("pointerleave", hideTooltip);
+        target.addEventListener("pointerleave", deactivateLink);
         target.addEventListener("click", openLink);
       }
 
+      label.addEventListener("focus", activateLinkFromFocus);
+      label.addEventListener("blur", deactivateLink);
       label.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
@@ -232,6 +318,7 @@ TopicGraph.afterDOMLoaded = `
       group.setAttribute("tabindex", "0");
       group.setAttribute("role", "link");
       group.setAttribute("aria-label", "Topic " + node.id);
+      group.style.setProperty("--topic-color", node.color);
       nodeLayer.appendChild(group);
 
       const circle = document.createElementNS(topicGraphSvgNS, "circle");
@@ -242,9 +329,25 @@ TopicGraph.afterDOMLoaded = `
       label.textContent = node.id;
       group.appendChild(label);
 
-      group.addEventListener("pointerenter", (event) => showNodeTooltip(node, event));
+      const activateNode = (event) => {
+        group.classList.add("is-active");
+        showNodeTooltip(node, event);
+      };
+      const activateNodeFromFocus = () => {
+        group.classList.add("is-active");
+        showNodeTooltip(node, { clientX: 0, clientY: 0 });
+        moveTooltipToElement(group);
+      };
+      const deactivateNode = () => {
+        group.classList.remove("is-active");
+        hideTooltip();
+      };
+
+      group.addEventListener("pointerenter", activateNode);
       group.addEventListener("pointermove", moveTooltip);
-      group.addEventListener("pointerleave", hideTooltip);
+      group.addEventListener("pointerleave", deactivateNode);
+      group.addEventListener("focus", activateNodeFromFocus);
+      group.addEventListener("blur", deactivateNode);
       group.addEventListener("click", () => topicGraphRouteTo("tags/" + encodeURIComponent(node.id)));
       group.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -355,6 +458,7 @@ TopicGraph.afterDOMLoaded = `
       window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", rerenderSoon);
       tooltip.remove();
+      legend.remove();
     };
   }
 

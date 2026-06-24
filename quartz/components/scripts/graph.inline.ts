@@ -63,6 +63,68 @@ function addToVisited(slug: SimpleSlug) {
   localStorage.setItem(localStorageKey, JSON.stringify([...visited]))
 }
 
+const graphTopicPalette = [
+  "#e78a4e",
+  "#b37feb",
+  "#58c4a7",
+  "#e86f8a",
+  "#6ea8fe",
+  "#d9a441",
+  "#9ad66f",
+  "#f06b5f",
+  "#7cc7d6",
+  "#c58af9",
+  "#f2b880",
+  "#8bd17c",
+]
+
+function graphTopicHash(value: string): number {
+  let hash = 0
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0
+  }
+  return hash
+}
+
+function graphTopicColor(topic: string): string {
+  return graphTopicPalette[graphTopicHash(topic) % graphTopicPalette.length]
+}
+
+function graphTopicName(node: NodeData): string | null {
+  if (node.id.startsWith("tags/")) return node.id.substring(5)
+  return node.tags[0] ?? null
+}
+
+function renderGraphTopicLegend(graph: HTMLElement, topics: string[]) {
+  if (topics.length === 0) return
+
+  const legend = document.createElement("div")
+  legend.className = "graph-topic-legend"
+
+  const title = document.createElement("div")
+  title.className = "graph-topic-legend-title"
+  title.textContent = "Topics"
+  legend.appendChild(title)
+
+  for (const topic of [...topics].sort((a, b) => a.localeCompare(b))) {
+    const item = document.createElement("div")
+    item.className = "graph-topic-legend-item"
+
+    const swatch = document.createElement("span")
+    swatch.className = "graph-topic-legend-swatch"
+    swatch.style.backgroundColor = graphTopicColor(topic)
+
+    const label = document.createElement("span")
+    label.className = "graph-topic-legend-label"
+    label.textContent = topic
+
+    item.append(swatch, label)
+    legend.appendChild(item)
+  }
+
+  graph.appendChild(legend)
+}
+
 type TweenNode = {
   update: (time: number) => void
   stop: () => void
@@ -160,6 +222,15 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
         target: nodes.find((n) => n.id === l.target)!,
       })),
   }
+  const visibleLegendTopics = [
+    ...new Set(
+      graphData.nodes
+        .map((node) => graphTopicName(node))
+        .filter((topic): topic is string => topic !== null),
+    ),
+  ]
+  const fallbackLegendTopics = tags.map((tag) => (tag.startsWith("tags/") ? tag.substring(5) : tag))
+  const legendTopics = visibleLegendTopics.length > 0 ? visibleLegendTopics : fallbackLegendTopics
 
   const width = graph.offsetWidth
   const height = Math.max(graph.offsetHeight, 250)
@@ -195,6 +266,11 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
 
   // calculate color
   const color = (d: NodeData) => {
+    const topic = graphTopicName(d)
+    if (topic) {
+      return graphTopicColor(topic)
+    }
+
     const isCurrent = d.id === slug
     if (isCurrent) {
       return computedStyleMap["--secondary"]
@@ -362,6 +438,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     eventMode: "static",
   })
   graph.appendChild(app.canvas)
+  renderGraphTopicLegend(graph, legendTopics)
 
   const stage = app.stage
   stage.interactive = false
@@ -399,7 +476,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       cursor: "pointer",
     })
       .circle(0, 0, nodeRadius(n))
-      .fill({ color: isTagNode ? computedStyleMap["--light"] : color(n) })
+      .fill({ color: color(n) })
       .on("pointerover", (e) => {
         updateHoverInfo(e.target.label)
         oldLabelOpacity = label.alpha
