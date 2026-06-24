@@ -29,7 +29,7 @@ export const sharedPageComponents: SharedLayout = {
     links: { GitHub: "https://github.com/ohyme-cyber/Quantum-Universe","League of Legends": "https://op.gg/zh-cn/lol/summoners/tw/Ohyme-tw2" }
   }),
   // 全局组件放在这里没问题，因为我们已经在组件内部写了“非主页即消失”的逻辑
-  afterBody: [Component.GlobalTags(), Component.TopicGraph()], 
+  afterBody: [Component.GlobalTags(), Component.TopicGraph(), Component.TopicRelationIndex()], 
 }
 
 export const defaultContentPageLayout: PageLayout = {
@@ -48,6 +48,9 @@ export const defaultContentPageLayout: PageLayout = {
       title: "Recently",
       limit: 200,
       showTags: false, // 侧边栏保持干净
+      filter: (page) =>
+        !page.slug?.startsWith("topic-relations/") &&
+        !(page.frontmatter?.tags ?? []).includes("topic-relation"),
     }),
   ],
   right: [

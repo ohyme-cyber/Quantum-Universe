@@ -53,3 +53,4 @@ export {
 }
 export { default as GlobalTags } from "./GlobalTags"
 export { default as TopicGraph } from "./TopicGraph"
+export { default as TopicRelationIndex } from "./TopicRelationIndex"

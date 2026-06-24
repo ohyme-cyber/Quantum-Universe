@@ -49,6 +49,61 @@ li {
   }
 }
 
+.topic-relation-index {
+  margin-top: 1.5rem;
+
+  h3 {
+    margin: 0 0 0.8rem;
+    color: var(--dark);
+    font-size: 1.05rem;
+  }
+
+  .topic-relation-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.75rem;
+  }
+
+  .topic-relation-item {
+    border: 1px solid var(--lightgray);
+    border-radius: 8px;
+    padding: 0.8rem 0.9rem;
+    background: color-mix(in srgb, var(--light) 96%, var(--highlight));
+  }
+
+  .topic-relation-title {
+    display: inline;
+    background: transparent;
+    color: var(--secondary);
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .topic-relation-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.55rem;
+
+    span {
+      border: 1px solid var(--lightgray);
+      border-radius: 999px;
+      padding: 0.1rem 0.45rem;
+      color: var(--tertiary);
+      font-size: 0.74rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+  }
+
+  p {
+    margin: 0.55rem 0 0;
+    color: var(--darkgray);
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+}
+
 /* 5. 课题图谱核心样式 */
 .topic-graph-container {
   margin-top: 3rem;
