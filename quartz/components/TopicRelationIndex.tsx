@@ -1,19 +1,7 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
-import { FullSlug, resolveRelative } from "../util/path"
+import { resolveRelative } from "../util/path"
 import { classNames } from "../util/lang"
-import topicLinks from "../../content/topic-links.json"
-
-type TopicLink = {
-  source?: string
-  target?: string
-  title?: string
-  idea?: string
-  result?: string
-  research?: string
-  page?: string
-  href?: string
-  url?: string
-}
+import { getTopicRelationData } from "./topicRelations"
 
 const TopicRelationIndex: QuartzComponent = ({
   allFiles,
@@ -22,27 +10,7 @@ const TopicRelationIndex: QuartzComponent = ({
 }: QuartzComponentProps) => {
   if (fileData.slug !== "index" && fileData.slug !== "") return null
 
-  const pageTitleBySlug = new Map(
-    allFiles
-      .filter((file) => file.slug)
-      .map((file) => [file.slug, file.frontmatter?.title] as const),
-  )
-
-  const relations = (topicLinks as TopicLink[])
-    .map((link) => {
-      const page = link.page ?? link.href ?? link.url
-      if (!link.source || !link.target || !page || /^https?:\/\//i.test(page)) return null
-
-      const slug = page.replace(/^\/+/, "") as FullSlug
-      return {
-        source: link.source,
-        target: link.target,
-        title: pageTitleBySlug.get(slug) ?? link.title ?? `${link.source} ↔ ${link.target}`,
-        summary: link.idea ?? link.result ?? link.research ?? "",
-        slug,
-      }
-    })
-    .filter((relation): relation is NonNullable<typeof relation> => relation !== null)
+  const relations = getTopicRelationData(allFiles).links.filter((relation) => relation.slug)
 
   if (relations.length === 0) return null
 
@@ -52,7 +20,10 @@ const TopicRelationIndex: QuartzComponent = ({
       <div class="topic-relation-list">
         {relations.map((relation) => (
           <article class="topic-relation-item">
-            <a class="topic-relation-title internal" href={resolveRelative(fileData.slug!, relation.slug)}>
+            <a
+              class="topic-relation-title internal"
+              href={resolveRelative(fileData.slug!, relation.slug!)}
+            >
               {relation.title}
             </a>
             <div class="topic-relation-topics" aria-label="关联 topic">

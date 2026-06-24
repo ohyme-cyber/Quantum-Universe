@@ -2,6 +2,9 @@
 title: 对偶电路作为测量诱导相变的解析模型
 date: 2026-06-24
 updated: 2026-06-24
+source: M-Induced
+target: Dual-Circuit
+summary: 对偶电路可以提供研究测量诱导相变的解析模型。
 status: seed
 priority: high
 thread: 补全模型定义、可解析量与数值验证路线。

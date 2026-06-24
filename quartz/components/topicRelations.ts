@@ -127,7 +127,11 @@ function cleanTopicTags(tags: string[]): string[] {
   return tags.filter((tag) => !reservedTopicTags.has(tag.toLowerCase()))
 }
 
-function isTopicRelation(file: QuartzPluginData, tags: string[], frontmatter: Frontmatter): boolean {
+function isTopicRelation(
+  file: QuartzPluginData,
+  tags: string[],
+  frontmatter: Frontmatter,
+): boolean {
   return (
     Boolean(file.slug?.startsWith("topic-relations/")) ||
     tags.some((tag) => tag.toLowerCase() === "topic-relation") ||
@@ -215,8 +219,14 @@ export function getTopicRelationData(allFiles: QuartzPluginData[]): TopicRelatio
 
     const [source, target] = pair
     const summary =
-      readFirst(frontmatter, ["summary", "idea", "result", "research", "abstract", "description"]) ??
-      ""
+      readFirst(frontmatter, [
+        "summary",
+        "idea",
+        "result",
+        "research",
+        "abstract",
+        "description",
+      ]) ?? ""
     const relation: TopicRelationRecord = {
       source,
       target,
