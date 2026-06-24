@@ -197,12 +197,14 @@ li {
     }
     &:hover circle,
     &.is-active circle,
+    &.is-focused circle,
     &:focus-visible circle {
       stroke: var(--secondary);
       stroke-width: 2.5;
     }
     &:hover text,
     &.is-active text,
+    &.is-focused text,
     &.is-readable text,
     &:focus-visible text {
       opacity: 1;
@@ -316,11 +318,26 @@ li {
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    width: 100%;
     margin: 0.18rem 0;
+    padding: 0.08rem 0.12rem;
     min-width: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
     color: var(--dark);
+    cursor: pointer;
+    font-family: var(--bodyFont);
     font-size: 0.74rem;
     line-height: 1.2;
+    text-align: left;
+  }
+
+  .topic-graph-legend-item:hover,
+  .topic-graph-legend-item:focus-visible,
+  .topic-graph-legend-item.is-selected {
+    background: var(--highlight);
+    outline: none;
   }
 
   .topic-graph-legend-swatch {

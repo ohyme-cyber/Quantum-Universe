@@ -97,7 +97,7 @@ TopicGraph.afterDOMLoaded = `
     return Math.min(Math.max(value, min), max);
   }
 
-  function topicGraphRenderLegend(container, nodes) {
+  function topicGraphRenderLegend(container, nodes, onSelectTopic) {
     const sortedNodes = [...nodes].sort((a, b) => a.id.localeCompare(b.id));
     const legend = document.createElement("details");
     legend.className = "topic-graph-legend";
@@ -120,8 +120,19 @@ TopicGraph.afterDOMLoaded = `
     list.className = "topic-graph-legend-list";
 
     for (const node of sortedNodes) {
-      const item = document.createElement("div");
+      const item = document.createElement("button");
       item.className = "topic-graph-legend-item";
+      item.type = "button";
+      item.dataset.topic = node.id;
+      item.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        for (const active of list.querySelectorAll(".topic-graph-legend-item.is-selected")) {
+          active.classList.remove("is-selected");
+        }
+        item.classList.add("is-selected");
+        onSelectTopic(node.id);
+      });
 
       const swatch = document.createElement("span");
       swatch.className = "topic-graph-legend-swatch";
@@ -231,12 +242,14 @@ TopicGraph.afterDOMLoaded = `
       sourceNode: positionedNodeById.get(link.source),
       targetNode: positionedNodeById.get(link.target),
     }));
-    const legend = topicGraphRenderLegend(container, nodes);
+    const legend = topicGraphRenderLegend(container, nodes, focusTopicNode);
 
     let viewScale = 1;
     let viewX = 0;
     let viewY = 0;
     let panState = null;
+    let focusedNodeEl = null;
+    let viewportAnimation = 0;
 
     function applyViewportTransform() {
       viewport.setAttribute(
@@ -256,6 +269,27 @@ TopicGraph.afterDOMLoaded = `
       viewX = pointerX - graphX * viewScale;
       viewY = pointerY - graphY * viewScale;
       applyViewportTransform();
+    }
+
+    function animateViewportTo(nextX, nextY, nextScale) {
+      window.cancelAnimationFrame(viewportAnimation);
+      const startX = viewX;
+      const startY = viewY;
+      const startScale = viewScale;
+      const startedAt = performance.now();
+      const duration = 320;
+
+      function tick(now) {
+        const progress = topicGraphClamp((now - startedAt) / duration, 0, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        viewX = startX + (nextX - startX) * eased;
+        viewY = startY + (nextY - startY) * eased;
+        viewScale = startScale + (nextScale - startScale) * eased;
+        applyViewportTransform();
+        if (progress < 1) viewportAnimation = window.requestAnimationFrame(tick);
+      }
+
+      viewportAnimation = window.requestAnimationFrame(tick);
     }
 
     function handleWheel(event) {
@@ -477,6 +511,24 @@ TopicGraph.afterDOMLoaded = `
       }
     }
 
+    function focusTopicNode(topic) {
+      const item = nodeEls.find((entry) => entry.node.id === topic);
+      if (!item) return;
+
+      if (focusedNodeEl) focusedNodeEl.classList.remove("is-focused");
+      focusedNodeEl = item.group;
+      focusedNodeEl.classList.add("is-focused", "is-readable");
+      container.dataset.focusedTopic = topic;
+
+      const nextScale = topicGraphClamp(
+        Math.max(viewScale, container.classList.contains("maximized") ? 1.8 : 2.4),
+        0.7,
+        4,
+      );
+      container.dataset.focusScale = String(nextScale);
+      animateViewportTo(width / 2 - item.node.x * nextScale, height / 2 - item.node.y * nextScale, nextScale);
+    }
+
     function renderPositions() {
       for (const item of linkEls) {
         const source = item.link.sourceNode;
@@ -576,6 +628,7 @@ TopicGraph.afterDOMLoaded = `
     topicGraphCleanup = () => {
       stopped = true;
       window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(viewportAnimation);
       window.removeEventListener("resize", rerenderSoon);
       svg.removeEventListener("wheel", handleWheel);
       svg.removeEventListener("pointerdown", handlePointerDown);

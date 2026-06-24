@@ -157,11 +157,26 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    width: 100%;
     margin: 0.16rem 0;
+    padding: 0.08rem 0.12rem;
     min-width: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
     color: var(--dark);
+    cursor: pointer;
+    font-family: var(--bodyFont);
     font-size: 0.72rem;
     line-height: 1.2;
+    text-align: left;
+  }
+
+  .graph-topic-legend-item:hover,
+  .graph-topic-legend-item:focus-visible,
+  .graph-topic-legend-item.is-selected {
+    background: var(--highlight);
+    outline: none;
   }
 
   .graph-topic-legend-swatch {

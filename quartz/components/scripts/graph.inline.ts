@@ -95,7 +95,11 @@ function graphTopicName(node: NodeData): string | null {
   return node.tags[0] ?? null
 }
 
-function renderGraphTopicLegend(graph: HTMLElement, topics: string[]) {
+function renderGraphTopicLegend(
+  graph: HTMLElement,
+  topics: string[],
+  onSelectTopic: (topic: string) => void,
+) {
   if (topics.length === 0) return
 
   const sortedTopics = [...topics].sort((a, b) => a.localeCompare(b))
@@ -120,8 +124,19 @@ function renderGraphTopicLegend(graph: HTMLElement, topics: string[]) {
   list.className = "graph-topic-legend-list"
 
   for (const topic of sortedTopics) {
-    const item = document.createElement("div")
+    const item = document.createElement("button")
     item.className = "graph-topic-legend-item"
+    item.type = "button"
+    item.dataset.topic = topic
+    item.addEventListener("click", (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      for (const active of list.querySelectorAll(".graph-topic-legend-item.is-selected")) {
+        active.classList.remove("is-selected")
+      }
+      item.classList.add("is-selected")
+      onSelectTopic(topic)
+    })
 
     const swatch = document.createElement("span")
     swatch.className = "graph-topic-legend-swatch"
@@ -452,7 +467,6 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     eventMode: "static",
   })
   graph.appendChild(app.canvas)
-  renderGraphTopicLegend(graph, legendTopics)
 
   const stage = app.stage
   stage.interactive = false
@@ -541,6 +555,59 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   }
 
   let currentTransform = zoomIdentity
+
+  function applyGraphTransform(transform: typeof zoomIdentity) {
+    currentTransform = transform
+    stage.scale.set(transform.k, transform.k)
+    stage.position.set(transform.x, transform.y)
+
+    const zoomLabelScale = transform.k * opacityScale
+    const scaleOpacity = Math.max((zoomLabelScale - 1) / 3.75, 0)
+    const activeNodes = nodeRenderData.filter((n) => n.active).flatMap((n) => n.label)
+
+    for (const label of labelsContainer.children) {
+      if (!activeNodes.includes(label)) {
+        label.alpha = scaleOpacity
+      }
+    }
+  }
+
+  function focusGraphTopic(topic: string) {
+    const tagId = simplifySlug(("tags/" + topic) as FullSlug)
+    const normalizedTagId = tagId.toLowerCase()
+    const normalizedTopic = topic.toLowerCase()
+    const target =
+      nodeRenderData.find((n) => n.simulationData.id === tagId) ??
+      nodeRenderData.find((n) => n.simulationData.id.toLowerCase() === normalizedTagId) ??
+      nodeRenderData.find((n) => graphTopicName(n.simulationData) === topic) ??
+      nodeRenderData.find((n) => graphTopicName(n.simulationData)?.toLowerCase() === normalizedTopic)
+    if (!target) {
+      delete graph.dataset.focusedTopic
+      delete graph.dataset.focusedNode
+      return
+    }
+
+    updateHoverInfo(target.simulationData.id)
+    renderPixiFromD3()
+    target.label.alpha = 1
+    graph.dataset.focusedTopic = topic
+    graph.dataset.focusedNode = target.simulationData.id
+
+    const nodeX = (target.simulationData.x ?? 0) + width / 2
+    const nodeY = (target.simulationData.y ?? 0) + height / 2
+    const targetScale = graph.classList.contains("global-graph-container") ? 1.8 : 2.4
+    const nextScale = Math.min(4, Math.max(currentTransform.k, targetScale))
+    const nextTransform = zoomIdentity
+      .translate(width / 2 - nodeX * nextScale, height / 2 - nodeY * nextScale)
+      .scale(nextScale)
+
+    graph.dataset.focusScale = String(nextScale)
+    select<HTMLCanvasElement, NodeData>(app.canvas).property("__zoom", nextTransform)
+    applyGraphTransform(nextTransform)
+  }
+
+  renderGraphTopicLegend(graph, legendTopics, focusGraphTopic)
+
   if (enableDrag) {
     select<HTMLCanvasElement, NodeData | undefined>(app.canvas).call(
       drag<HTMLCanvasElement, NodeData | undefined>()
@@ -596,20 +663,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
         ])
         .scaleExtent([0.25, 4])
         .on("zoom", ({ transform }) => {
-          currentTransform = transform
-          stage.scale.set(transform.k, transform.k)
-          stage.position.set(transform.x, transform.y)
-
-          // zoom adjusts opacity of labels too
-          const scale = transform.k * opacityScale
-          let scaleOpacity = Math.max((scale - 1) / 3.75, 0)
-          const activeNodes = nodeRenderData.filter((n) => n.active).flatMap((n) => n.label)
-
-          for (const label of labelsContainer.children) {
-            if (!activeNodes.includes(label)) {
-              label.alpha = scaleOpacity
-            }
-          }
+          applyGraphTransform(transform)
         }),
     )
   }
