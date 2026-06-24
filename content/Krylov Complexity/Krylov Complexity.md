@@ -3,6 +3,7 @@ title: 从算符增长到 Krylov Complexity：一份初学者 Lecture Note
 tags:
   - Minimal-M
   - Krylov-Complexity
+  - Tutorial
 date: 2026-06-24
 ---
 ## 0. 这份笔记想回答什么问题？
