@@ -16,7 +16,7 @@ const defaultOptions: SearchOptions = {
 export default ((userOpts?: Partial<SearchOptions>) => {
   const Search: QuartzComponent = ({ displayClass, cfg }: QuartzComponentProps) => {
     const opts = { ...defaultOptions, ...userOpts }
-    const searchPlaceholder = i18n(cfg.locale).components.search.searchBarPlaceholder
+    const searchPlaceholder = "搜索文章关键词、标题或标签"
     return (
       <div class={classNames(displayClass, "search")}>
         <button class="search-button">
@@ -31,6 +31,35 @@ export default ((userOpts?: Partial<SearchOptions>) => {
         </button>
         <div class="search-container">
           <div class="search-space">
+            <div class="search-mode-tabs" role="tablist" aria-label="搜索范围">
+              <button
+                type="button"
+                class="search-mode-button active"
+                data-search-mode="all"
+                role="tab"
+                aria-selected="true"
+              >
+                全部
+              </button>
+              <button
+                type="button"
+                class="search-mode-button"
+                data-search-mode="content"
+                role="tab"
+                aria-selected="false"
+              >
+                文章
+              </button>
+              <button
+                type="button"
+                class="search-mode-button"
+                data-search-mode="tags"
+                role="tab"
+                aria-selected="false"
+              >
+                标签
+              </button>
+            </div>
             <input
               autocomplete="off"
               class="search-bar"

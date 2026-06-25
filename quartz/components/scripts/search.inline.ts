@@ -12,9 +12,8 @@ interface Item {
   [key: string]: any
 }
 
-// Can be expanded with things like "term" in the future
-type SearchType = "basic" | "tags"
-let searchType: SearchType = "basic"
+type SearchType = "all" | "content" | "tags"
+let searchType: SearchType = "all"
 let currentSearchTerm: string = ""
 const encoder = (str: string): string[] => {
   const tokens: string[] = []
@@ -199,6 +198,10 @@ async function setupSearch(searchElement: Element, currentSlug: FullSlug, data: 
   const searchBar = searchElement.querySelector(".search-bar") as HTMLInputElement
   if (!searchBar) return
 
+  const searchModeButtons = Array.from(
+    searchElement.querySelectorAll(".search-mode-button"),
+  ) as HTMLButtonElement[]
+
   const searchLayout = searchElement.querySelector(".search-layout") as HTMLElement
   if (!searchLayout) return
 
@@ -229,12 +232,29 @@ async function setupSearch(searchElement: Element, currentSlug: FullSlug, data: 
       removeAllChildren(preview)
     }
     searchLayout.classList.remove("display-results")
-    searchType = "basic" // reset search type after closing
+    searchType = "all" // reset search type after closing
+    updateSearchMode("all")
     searchButton.focus()
   }
 
+  function updateSearchMode(nextType: SearchType) {
+    searchType = nextType
+    for (const button of searchModeButtons) {
+      const isActive = button.dataset.searchMode === nextType
+      button.classList.toggle("active", isActive)
+      button.setAttribute("aria-selected", String(isActive))
+    }
+
+    const placeholders: Record<SearchType, string> = {
+      all: "搜索文章关键词、标题或标签",
+      content: "搜索文章标题或正文关键词",
+      tags: "搜索标签，如 M-Induced 或 #M-Induced",
+    }
+    searchBar.placeholder = placeholders[nextType]
+  }
+
   function showSearch(searchTypeNew: SearchType) {
-    searchType = searchTypeNew
+    updateSearchMode(searchTypeNew)
     if (sidebar) sidebar.style.zIndex = "1"
     container.classList.add("active")
     searchBar.focus()
@@ -245,7 +265,7 @@ async function setupSearch(searchElement: Element, currentSlug: FullSlug, data: 
     if (e.key === "k" && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
       e.preventDefault()
       const searchBarOpen = container.classList.contains("active")
-      searchBarOpen ? hideSearch() : showSearch("basic")
+      searchBarOpen ? hideSearch() : showSearch("all")
       return
     } else if (e.shiftKey && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
       // Hotkey to open tag search
@@ -312,20 +332,21 @@ async function setupSearch(searchElement: Element, currentSlug: FullSlug, data: 
     return {
       id,
       slug,
-      title: searchType === "tags" ? data[slug].title : highlight(term, data[slug].title ?? ""),
+      title: highlight(term, data[slug].title ?? ""),
       content: highlight(term, data[slug].content ?? "", true),
-      tags: highlightTags(term.substring(1), data[slug].tags),
+      tags: highlightTags(term, data[slug].tags),
     }
   }
 
   function highlightTags(term: string, tags: string[]) {
-    if (!tags || searchType !== "tags") {
+    if (!tags) {
       return []
     }
 
+    const normalizedTerm = term.replace(/^#/, "").trim()
     return tags
       .map((tag) => {
-        if (tag.toLowerCase().includes(term.toLowerCase())) {
+        if (normalizedTerm && tag.toLowerCase().includes(normalizedTerm.toLowerCase())) {
           return `<li><p class="match-tag">#${tag}</p></li>`
         } else {
           return `<li><p>#${tag}</p></li>`
@@ -437,13 +458,15 @@ async function setupSearch(searchElement: Element, currentSlug: FullSlug, data: 
 
   async function onType(e: HTMLElementEventMap["input"]) {
     if (!searchLayout || !index) return
-    currentSearchTerm = (e.target as HTMLInputElement).value
-    searchLayout.classList.toggle("display-results", currentSearchTerm !== "")
-    searchType = currentSearchTerm.startsWith("#") ? "tags" : "basic"
+    const rawSearchTerm = (e.target as HTMLInputElement).value.trim()
+    searchLayout.classList.toggle("display-results", rawSearchTerm !== "")
+
+    const prefixTagSearch = rawSearchTerm.startsWith("#")
+    const activeSearchType: SearchType = prefixTagSearch ? "tags" : searchType
+    currentSearchTerm = prefixTagSearch ? rawSearchTerm.substring(1).trim() : rawSearchTerm
 
     let searchResults: DefaultDocumentSearchResults<Item>
-    if (searchType === "tags") {
-      currentSearchTerm = currentSearchTerm.substring(1).trim()
+    if (activeSearchType === "tags") {
       const separatorIndex = currentSearchTerm.indexOf(" ")
       if (separatorIndex != -1) {
         // search by title and content index and then filter by tag (implemented in flexsearch)
@@ -459,8 +482,6 @@ async function setupSearch(searchElement: Element, currentSlug: FullSlug, data: 
         for (let searchResult of searchResults) {
           searchResult.result = searchResult.result.slice(0, numSearchResults)
         }
-        // set search type to basic and remove tag from term for proper highlightning and scroll
-        searchType = "basic"
         currentSearchTerm = query
       } else {
         // default search by tags index
@@ -470,11 +491,17 @@ async function setupSearch(searchElement: Element, currentSlug: FullSlug, data: 
           index: ["tags"],
         })
       }
-    } else if (searchType === "basic") {
+    } else if (activeSearchType === "content") {
       searchResults = await index.searchAsync({
         query: currentSearchTerm,
         limit: numSearchResults,
         index: ["title", "content"],
+      })
+    } else {
+      searchResults = await index.searchAsync({
+        query: currentSearchTerm,
+        limit: numSearchResults,
+        index: ["title", "content", "tags"],
       })
     }
 
@@ -495,8 +522,19 @@ async function setupSearch(searchElement: Element, currentSlug: FullSlug, data: 
 
   document.addEventListener("keydown", shortcutHandler)
   window.addCleanup(() => document.removeEventListener("keydown", shortcutHandler))
-  searchButton.addEventListener("click", () => showSearch("basic"))
-  window.addCleanup(() => searchButton.removeEventListener("click", () => showSearch("basic")))
+  const openSearch = () => showSearch("all")
+  searchButton.addEventListener("click", openSearch)
+  window.addCleanup(() => searchButton.removeEventListener("click", openSearch))
+  for (const button of searchModeButtons) {
+    const mode = button.dataset.searchMode as SearchType
+    const changeMode = () => {
+      updateSearchMode(mode)
+      searchBar.focus()
+      searchBar.dispatchEvent(new Event("input", { bubbles: true }))
+    }
+    button.addEventListener("click", changeMode)
+    window.addCleanup(() => button.removeEventListener("click", changeMode))
+  }
   searchBar.addEventListener("input", onType)
   window.addCleanup(() => searchBar.removeEventListener("input", onType))
 
