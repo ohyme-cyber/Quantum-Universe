@@ -97,11 +97,53 @@ TopicGraph.afterDOMLoaded = `
     return Math.min(Math.max(value, min), max);
   }
 
+  const topicGraphLegendSortStorageKey = "topic-graph-legend-sort";
+
+  function topicGraphReadLegendSort() {
+    const fallback = { mode: "alpha", direction: "asc" };
+    try {
+      const saved = JSON.parse(localStorage.getItem(topicGraphLegendSortStorageKey) || "{}");
+      return {
+        mode: saved.mode === "links" ? "links" : fallback.mode,
+        direction: saved.direction === "desc" ? "desc" : fallback.direction,
+      };
+    } catch {
+      return fallback;
+    }
+  }
+
+  function topicGraphSaveLegendSort(sort) {
+    try {
+      localStorage.setItem(topicGraphLegendSortStorageKey, JSON.stringify(sort));
+    } catch {
+      // Ignore storage failures; sorting still works for this render.
+    }
+  }
+
+  function topicGraphCompareLegendEntries(a, b, sort) {
+    const direction = sort.direction === "asc" ? 1 : -1;
+    const alpha = a.topic.localeCompare(b.topic, undefined, { sensitivity: "base" });
+
+    if (sort.mode === "links") {
+      const diff = a.degree - b.degree;
+      if (diff !== 0) return diff * direction;
+      return alpha;
+    }
+
+    return alpha * direction;
+  }
+
   function topicGraphRenderLegend(container, nodes, onSelectTopic) {
-    const sortedNodes = [...nodes].sort((a, b) => a.id.localeCompare(b.id));
+    const entries = nodes.map((node) => ({
+      node,
+      topic: node.id,
+      degree: Number(node.degree) || 0,
+    }));
     const legend = document.createElement("details");
     legend.className = "topic-graph-legend";
-    legend.open = sortedNodes.length <= 12;
+    legend.open = entries.length <= 12;
+    let selectedTopic = "";
+    let sortState = topicGraphReadLegendSort();
 
     const summary = document.createElement("summary");
     summary.className = "topic-graph-legend-summary";
@@ -111,44 +153,110 @@ TopicGraph.afterDOMLoaded = `
 
     const count = document.createElement("span");
     count.className = "topic-graph-legend-count";
-    count.textContent = String(sortedNodes.length);
+    count.textContent = String(entries.length);
 
     summary.append(title, count);
     legend.appendChild(summary);
 
-    const list = document.createElement("div");
-    list.className = "topic-graph-legend-list";
+    const controls = document.createElement("div");
+    controls.className = "topic-graph-legend-controls";
 
-    for (const node of sortedNodes) {
-      const item = document.createElement("button");
-      item.className = "topic-graph-legend-item";
-      item.type = "button";
-      item.dataset.topic = node.id;
-      item.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        for (const active of list.querySelectorAll(".topic-graph-legend-item.is-selected")) {
-          active.classList.remove("is-selected");
-        }
-        item.classList.add("is-selected");
-        if (onSelectTopic(node.id)) {
-          legend.open = false;
-        }
-      });
+    const alphaButton = document.createElement("button");
+    alphaButton.type = "button";
+    alphaButton.className = "topic-graph-legend-sort-button";
+    alphaButton.textContent = "A-Z";
+    alphaButton.title = "按字母排序";
 
-      const swatch = document.createElement("span");
-      swatch.className = "topic-graph-legend-swatch";
-      swatch.style.backgroundColor = node.color;
+    const linkButton = document.createElement("button");
+    linkButton.type = "button";
+    linkButton.className = "topic-graph-legend-sort-button";
+    linkButton.textContent = "连接数";
+    linkButton.title = "按连接数量排序";
 
-      const label = document.createElement("span");
-      label.className = "topic-graph-legend-label";
-      label.textContent = node.id;
+    const directionButton = document.createElement("button");
+    directionButton.type = "button";
+    directionButton.className = "topic-graph-legend-sort-button topic-graph-legend-direction";
 
-      item.append(swatch, label);
-      list.appendChild(item);
+    function syncSortControls() {
+      alphaButton.classList.toggle("is-active", sortState.mode === "alpha");
+      linkButton.classList.toggle("is-active", sortState.mode === "links");
+      directionButton.textContent = sortState.direction === "asc" ? "↑" : "↓";
+      directionButton.title = sortState.direction === "asc" ? "正序" : "倒序";
+      directionButton.setAttribute("aria-label", directionButton.title);
     }
 
+    function renderList() {
+      list.innerHTML = "";
+      for (const entry of [...entries].sort((a, b) => topicGraphCompareLegendEntries(a, b, sortState))) {
+        const item = document.createElement("button");
+        item.className = "topic-graph-legend-item";
+        item.type = "button";
+        item.dataset.topic = entry.topic;
+        item.classList.toggle("is-selected", entry.topic === selectedTopic);
+        item.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          for (const active of list.querySelectorAll(".topic-graph-legend-item.is-selected")) {
+            active.classList.remove("is-selected");
+          }
+          item.classList.add("is-selected");
+          selectedTopic = entry.topic;
+          if (onSelectTopic(entry.topic)) {
+            legend.open = false;
+          }
+        });
+
+        const swatch = document.createElement("span");
+        swatch.className = "topic-graph-legend-swatch";
+        swatch.style.backgroundColor = entry.node.color;
+
+        const label = document.createElement("span");
+        label.className = "topic-graph-legend-label";
+        label.textContent = entry.topic;
+
+        const degree = document.createElement("span");
+        degree.className = "topic-graph-legend-degree";
+        degree.textContent = String(entry.degree);
+        degree.title = entry.degree + " 条连接";
+
+        item.append(swatch, label, degree);
+        list.appendChild(item);
+      }
+    }
+
+    function changeSort(nextSort) {
+      sortState = { ...sortState, ...nextSort };
+      topicGraphSaveLegendSort(sortState);
+      syncSortControls();
+      renderList();
+    }
+
+    alphaButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      changeSort({ mode: "alpha" });
+    });
+
+    linkButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      changeSort({ mode: "links" });
+    });
+
+    directionButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      changeSort({ direction: sortState.direction === "asc" ? "desc" : "asc" });
+    });
+
+    controls.append(alphaButton, linkButton, directionButton);
+    legend.appendChild(controls);
+
+    const list = document.createElement("div");
+    list.className = "topic-graph-legend-list";
     legend.appendChild(list);
+    syncSortControls();
+    renderList();
     container.appendChild(legend);
     return legend;
   }

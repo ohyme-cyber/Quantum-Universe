@@ -109,22 +109,86 @@ function graphTopicKind(topic: string): "classification" | "topic" {
   return graphClassificationLabels.has(topic.toLowerCase()) ? "classification" : "topic"
 }
 
+type GraphLegendSortMode = "alpha" | "links"
+type GraphLegendSortDirection = "asc" | "desc"
+type GraphLegendEntry = {
+  topic: string
+  degree: number
+}
+
+type GraphLegendSort = {
+  mode: GraphLegendSortMode
+  direction: GraphLegendSortDirection
+}
+
+const graphLegendSortStorageKey = "graph-topic-legend-sort"
+
+function readGraphLegendSort(): GraphLegendSort {
+  const fallback: GraphLegendSort = { mode: "alpha", direction: "asc" }
+  try {
+    const saved = JSON.parse(localStorage.getItem(graphLegendSortStorageKey) ?? "{}")
+    return {
+      mode: saved.mode === "links" ? "links" : fallback.mode,
+      direction: saved.direction === "desc" ? "desc" : fallback.direction,
+    }
+  } catch {
+    return fallback
+  }
+}
+
+function saveGraphLegendSort(sort: GraphLegendSort) {
+  try {
+    localStorage.setItem(graphLegendSortStorageKey, JSON.stringify(sort))
+  } catch {
+    // Ignore storage failures; the legend can still sort for the current render.
+  }
+}
+
+function compareGraphLegendEntries(
+  a: GraphLegendEntry,
+  b: GraphLegendEntry,
+  sort: GraphLegendSort,
+) {
+  const direction = sort.direction === "asc" ? 1 : -1
+  const alpha = a.topic.localeCompare(b.topic, undefined, { sensitivity: "base" })
+
+  if (sort.mode === "links") {
+    const diff = a.degree - b.degree
+    if (diff !== 0) return diff * direction
+    return alpha
+  }
+
+  return alpha * direction
+}
+
 function renderGraphTopicLegend(
   graph: HTMLElement,
-  topics: string[],
+  entries: GraphLegendEntry[],
   onSelectTopic: (topic: string) => boolean,
 ) {
-  if (topics.length === 0) return
+  if (entries.length === 0) return
 
-  const sortedTopics = [...topics].sort((a, b) => a.localeCompare(b))
+  const entryByTopic = new Map<string, GraphLegendEntry>()
+  for (const entry of entries) {
+    const existing = entryByTopic.get(entry.topic)
+    entryByTopic.set(entry.topic, {
+      topic: entry.topic,
+      degree: Math.max(existing?.degree ?? 0, entry.degree),
+    })
+  }
+  const legendEntries = [...entryByTopic.values()]
   const isGlobalLegend = graph.classList.contains("global-graph-container")
   const groupedTopics = {
-    classification: sortedTopics.filter((topic) => graphTopicKind(topic) === "classification"),
-    topic: sortedTopics.filter((topic) => graphTopicKind(topic) === "topic"),
+    classification: legendEntries.filter(
+      (entry) => graphTopicKind(entry.topic) === "classification",
+    ),
+    topic: legendEntries.filter((entry) => graphTopicKind(entry.topic) === "topic"),
   }
   const legend = document.createElement("details")
   legend.className = "graph-topic-legend"
   legend.open = isGlobalLegend
+  let selectedTopic = ""
+  let sortState = readGraphLegendSort()
 
   const summary = document.createElement("summary")
   summary.className = "graph-topic-legend-summary"
@@ -134,13 +198,72 @@ function renderGraphTopicLegend(
 
   const count = document.createElement("span")
   count.className = "graph-topic-legend-count"
-  count.textContent = String(sortedTopics.length)
+  count.textContent = String(legendEntries.length)
 
   summary.append(title, count)
   legend.appendChild(summary)
 
-  function appendSection(sectionTitle: string, sectionTopics: string[]) {
-    if (sectionTopics.length === 0) return
+  const controls = document.createElement("div")
+  controls.className = "graph-topic-legend-controls"
+
+  const alphaButton = document.createElement("button")
+  alphaButton.type = "button"
+  alphaButton.className = "graph-topic-legend-sort-button"
+  alphaButton.textContent = "A-Z"
+  alphaButton.title = "Sort alphabetically"
+
+  const linkButton = document.createElement("button")
+  linkButton.type = "button"
+  linkButton.className = "graph-topic-legend-sort-button"
+  linkButton.textContent = "Links"
+  linkButton.title = "Sort by connection count"
+
+  const directionButton = document.createElement("button")
+  directionButton.type = "button"
+  directionButton.className = "graph-topic-legend-sort-button graph-topic-legend-direction"
+
+  function syncSortControls() {
+    alphaButton.classList.toggle("is-active", sortState.mode === "alpha")
+    linkButton.classList.toggle("is-active", sortState.mode === "links")
+    directionButton.textContent = sortState.direction === "asc" ? "↑" : "↓"
+    directionButton.title = sortState.direction === "asc" ? "Ascending" : "Descending"
+    directionButton.setAttribute("aria-label", directionButton.title)
+  }
+
+  function changeSort(nextSort: Partial<GraphLegendSort>) {
+    sortState = { ...sortState, ...nextSort }
+    saveGraphLegendSort(sortState)
+    syncSortControls()
+    renderSections()
+  }
+
+  alphaButton.addEventListener("click", (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    changeSort({ mode: "alpha" })
+  })
+
+  linkButton.addEventListener("click", (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    changeSort({ mode: "links" })
+  })
+
+  directionButton.addEventListener("click", (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    changeSort({ direction: sortState.direction === "asc" ? "desc" : "asc" })
+  })
+
+  controls.append(alphaButton, linkButton, directionButton)
+  legend.appendChild(controls)
+
+  const sections = document.createElement("div")
+  sections.className = "graph-topic-legend-sections"
+  legend.appendChild(sections)
+
+  function appendSection(sectionTitle: string, sectionEntries: GraphLegendEntry[]) {
+    if (sectionEntries.length === 0) return
 
     const section = document.createElement("div")
     section.className = "graph-topic-legend-section"
@@ -153,12 +276,15 @@ function renderGraphTopicLegend(
     const list = document.createElement("div")
     list.className = "graph-topic-legend-list"
 
-    for (const topic of sectionTopics) {
+    for (const entry of [...sectionEntries].sort((a, b) =>
+      compareGraphLegendEntries(a, b, sortState),
+    )) {
       const item = document.createElement("button")
       item.className = "graph-topic-legend-item"
       item.type = "button"
-      item.dataset.topic = topic
-      item.dataset.kind = graphTopicKind(topic)
+      item.dataset.topic = entry.topic
+      item.dataset.kind = graphTopicKind(entry.topic)
+      item.classList.toggle("is-selected", entry.topic === selectedTopic)
       item.addEventListener("click", (event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -166,29 +292,41 @@ function renderGraphTopicLegend(
           active.classList.remove("is-selected")
         }
         item.classList.add("is-selected")
-        if (onSelectTopic(topic)) {
+        selectedTopic = entry.topic
+        if (onSelectTopic(entry.topic)) {
           legend.open = false
         }
       })
 
       const swatch = document.createElement("span")
       swatch.className = "graph-topic-legend-swatch"
-      swatch.style.backgroundColor = graphTopicColor(topic)
+      swatch.style.backgroundColor = graphTopicColor(entry.topic)
 
       const label = document.createElement("span")
       label.className = "graph-topic-legend-label"
-      label.textContent = topic
+      label.textContent = entry.topic
 
-      item.append(swatch, label)
+      const degree = document.createElement("span")
+      degree.className = "graph-topic-legend-degree"
+      degree.textContent = String(entry.degree)
+      degree.title = entry.degree + " connections"
+
+      item.append(swatch, label, degree)
       list.appendChild(item)
     }
 
     section.appendChild(list)
-    legend.appendChild(section)
+    sections.appendChild(section)
   }
 
-  appendSection("Classification", groupedTopics.classification)
-  appendSection("Topics", groupedTopics.topic)
+  function renderSections() {
+    sections.innerHTML = ""
+    appendSection("Classification", groupedTopics.classification)
+    appendSection("Topics", groupedTopics.topic)
+  }
+
+  syncSortControls()
+  renderSections()
   graph.appendChild(legend)
 }
 
@@ -300,6 +438,26 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const fallbackLegendTopics = tags.map((tag) => (tag.startsWith("tags/") ? tag.substring(5) : tag))
   const legendTopics =
     visibleLegendTopics.length > 0 ? visibleLegendTopics : isGlobalGraph ? fallbackLegendTopics : []
+  const nodeDegree = new Map<SimpleSlug, number>()
+  for (const link of graphData.links) {
+    nodeDegree.set(link.source.id, (nodeDegree.get(link.source.id) ?? 0) + 1)
+    nodeDegree.set(link.target.id, (nodeDegree.get(link.target.id) ?? 0) + 1)
+  }
+
+  const legendTopicDegrees = new Map<string, number>()
+  for (const node of graphData.nodes) {
+    const topic = graphTopicName(node)
+    if (!topic) continue
+    legendTopicDegrees.set(
+      topic,
+      (legendTopicDegrees.get(topic) ?? 0) + (nodeDegree.get(node.id) ?? 0),
+    )
+  }
+
+  const legendEntries = legendTopics.map((topic) => ({
+    topic,
+    degree: legendTopicDegrees.get(topic) ?? 0,
+  }))
 
   const width = graph.offsetWidth
   const height = Math.max(graph.offsetHeight, 250)
@@ -654,7 +812,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     return true
   }
 
-  renderGraphTopicLegend(graph, legendTopics, focusGraphTopic)
+  renderGraphTopicLegend(graph, legendEntries, focusGraphTopic)
 
   if (enableDrag) {
     select<HTMLCanvasElement, NodeData | undefined>(app.canvas).call(

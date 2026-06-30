@@ -132,6 +132,38 @@
     transform: rotate(90deg);
   }
 
+  .graph-topic-legend-controls {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .graph-topic-legend-sort-button {
+    border: 1px solid var(--lightgray);
+    border-radius: 4px;
+    padding: 0.08rem 0.35rem;
+    background: transparent;
+    color: var(--gray);
+    cursor: pointer;
+    font-family: var(--bodyFont);
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .graph-topic-legend-sort-button:hover,
+  .graph-topic-legend-sort-button:focus-visible,
+  .graph-topic-legend-sort-button.is-active {
+    background: var(--highlight);
+    color: var(--dark);
+    outline: none;
+  }
+
+  .graph-topic-legend-direction {
+    margin-left: auto;
+    min-width: 1.5rem;
+  }
+
   .graph-topic-legend-count {
     margin-left: auto;
     padding: 0.06rem 0.35rem;
@@ -203,8 +235,18 @@
   }
 
   .graph-topic-legend-label {
+    min-width: 0;
+    flex: 1 1 auto;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .graph-topic-legend-degree {
+    margin-left: auto;
+    color: var(--gray);
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 1;
   }
 }
