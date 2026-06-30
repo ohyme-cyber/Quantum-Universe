@@ -117,13 +117,14 @@ function renderGraphTopicLegend(
   if (topics.length === 0) return
 
   const sortedTopics = [...topics].sort((a, b) => a.localeCompare(b))
+  const isGlobalLegend = graph.classList.contains("global-graph-container")
   const groupedTopics = {
     classification: sortedTopics.filter((topic) => graphTopicKind(topic) === "classification"),
     topic: sortedTopics.filter((topic) => graphTopicKind(topic) === "topic"),
   }
   const legend = document.createElement("details")
   legend.className = "graph-topic-legend"
-  legend.open = graph.classList.contains("global-graph-container") || sortedTopics.length <= 12
+  legend.open = isGlobalLegend
 
   const summary = document.createElement("summary")
   summary.className = "graph-topic-legend-summary"
@@ -353,7 +354,8 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     const numLinks = graphData.links.filter(
       (l) => l.source.id === d.id || l.target.id === d.id,
     ).length
-    return 2 + Math.sqrt(numLinks)
+    const currentBoost = d.id === slug ? 2.5 : 0
+    return 2 + Math.sqrt(numLinks) + currentBoost
   }
 
   let hoveredNodeId: string | null = null
@@ -561,6 +563,10 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
 
     if (isTagNode) {
       gfx.stroke({ width: 2, color: computedStyleMap["--tertiary"] })
+    }
+
+    if (nodeId === slug) {
+      gfx.stroke({ width: 2.5, color: computedStyleMap["--secondary"] })
     }
 
     nodesContainer.addChild(gfx)
