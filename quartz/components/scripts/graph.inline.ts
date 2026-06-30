@@ -625,7 +625,9 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       nodeRenderData.find((n) => n.simulationData.id === tagId) ??
       nodeRenderData.find((n) => n.simulationData.id.toLowerCase() === normalizedTagId) ??
       nodeRenderData.find((n) => graphTopicName(n.simulationData) === topic) ??
-      nodeRenderData.find((n) => graphTopicName(n.simulationData)?.toLowerCase() === normalizedTopic)
+      nodeRenderData.find(
+        (n) => graphTopicName(n.simulationData)?.toLowerCase() === normalizedTopic,
+      )
     if (!target) {
       delete graph.dataset.focusedTopic
       delete graph.dataset.focusedNode
