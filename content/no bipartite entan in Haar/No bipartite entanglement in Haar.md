@@ -1,5 +1,12 @@
-# 三方 Haar 随机态中的纠缠结构：为什么有强量子相关却没有 AB EPR 对？
-
+---
+title: 三方 Haar 随机态中的纠缠结构：为什么有强量子相关却没有 AB EPR 对？
+date: 2026-06-30
+tags:
+  - Haar-Ensemble
+  - Minimal-M
+  - Bipartite-Entanglement
+  - Distill-Entanglement
+---
 ## 0. 一句话总结
 
 三方 Haar 随机纯态
