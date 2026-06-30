@@ -215,7 +215,7 @@ function renderGraphTopicLegend(
   const linkButton = document.createElement("button")
   linkButton.type = "button"
   linkButton.className = "graph-topic-legend-sort-button"
-  linkButton.textContent = "Links"
+  linkButton.textContent = "连接数"
   linkButton.title = "Sort by connection count"
 
   const directionButton = document.createElement("button")
