@@ -21,7 +21,7 @@ $$
 
 给定一个 global pure state $|\Psi\rangle\in \mathcal H_A\otimes \mathcal H_B$，测量 $B$ 后，subsystem $A$ 上得到 conditional projected state
 
-# $$  
+$$  
 |\psi_{\Psi,m_B}\rangle=
 
 \frac{  
@@ -33,7 +33,7 @@ $$
 
 其中
 
-# $$  
+$$  
 p_\Psi(m_B)
 
 |(I_A\otimes \langle m_B|)|\Psi\rangle|^2.  
@@ -41,7 +41,7 @@ $$
 
 于是一个 global state $|\Psi\rangle$ 会生成一个 projected ensemble
 
-# $$  
+$$  
 E(|\Psi\rangle,M_B)
 =
 \{p_\Psi(m_B),|\psi_{\Psi,m_B}\rangle\}_{m_B}.  
@@ -52,7 +52,7 @@ $$
 - 在理论上，我们经常研究整个 generator ensemble $D$ 产生的 combined projected ensemble：
     
 
-# $$  
+$$  
 E(D,M_B)
 =
 \{p_dp_d(m_B),|\psi_{d,m_B}\rangle\}_{d,m_B}.  
@@ -128,7 +128,7 @@ $$
 3. 这些 universal physical features 已经可以由 global density matrix
     
 
-# $$  
+$$  
 \rho_D
 =
 \sum_d p_d |\Psi_d\rangle\langle\Psi_d|  
@@ -151,7 +151,7 @@ $$
 
 这个 coarse-grained effective channel 对应的 quantum encoding 就是 meta ensemble：
 
-# $$  
+$$  
 \mathcal E_{\mathrm{Meta}}
 =
 \{p(m_B),\rho_A(m_B)\}_{m_B},  
@@ -159,7 +159,7 @@ $$
 
 其中
 
-# $$  
+$$  
 p(m_B)
 =
 \mathrm{Tr}\left[  
@@ -168,7 +168,7 @@ p(m_B)
 \right],  
 $$
 
-# $$  
+$$  
 \rho_A(m_B)
 =
 \frac{  
@@ -194,7 +194,7 @@ $$
 
 其中
 
-# $$  
+$$  
 E_{\mathrm{GSE}}[\mathcal E_{\mathrm{Meta}}]
 =
 \sum_{m_B}  
@@ -288,7 +288,7 @@ $$
 
 因此，要比较两个 ensembles 的 statistical distribution，需要比较 higher moments：
 
-# $$  
+$$  
 \rho^{(k)}_E
 =
 \mathbb E_{\psi\sim E}  
@@ -303,7 +303,7 @@ $$
 
 所以我们不试图证明：
 
-# $$  
+$$  
 E(|\Psi_s\rangle,M_B)
 \approx
 E(D,M_B)  
@@ -329,7 +329,7 @@ $$
 
 给定一个 sampled global state $|\Psi_s\rangle\sim D$，它生成的 projected ensemble 为
 
-# $$  
+$$  
 E(|\Psi_s\rangle,M_B)
 =
 \{p_s(m_B),|\psi_{s,m_B}\rangle\}_{m_B}.  
@@ -337,7 +337,7 @@ $$
 
 其 $k$-th moment 定义为
 
-# $$  
+$$  
 \rho^{(k)}_{s,M_B}
 =
 \sum_{m_B}  
@@ -361,7 +361,7 @@ $$
 
 combined projected ensemble 是
 
-# $$  
+$$  
 E(D,M_B)
 =
 \{p_d p_d(m_B),|\psi_{d,m_B}\rangle\}_{d,m_B}.  
@@ -369,7 +369,7 @@ $$
 
 其 $k$-th moment 为
 
-# $$  
+$$  
 \rho^{(k)}_{D,M_B}
 =
 \mathbb E_{\Psi\sim D}  
@@ -385,7 +385,7 @@ $$
 
 等价地，
 
-# $$  
+$$  
 \rho^{(k)}_{D,M_B}
 =
 \mathbb E_{\Psi\sim D}  
@@ -404,7 +404,7 @@ $$
 
 例如
 
-# $$  
+$$  
 E_{\mathrm{target}}
 =
 E_{\mathrm{GSE}}[\mathcal E_{\mathrm{Meta}}],  
@@ -412,7 +412,7 @@ $$
 
 或者 Real case 中的
 
-# $$  
+$$  
 E_{\mathrm{target}}
 =
 E_{\mathrm{GRSE}}[\mathcal E_{\mathrm{Meta}}],  
@@ -420,7 +420,7 @@ $$
 
 则定义 target moment：
 
-# $$  
+$$  
 \rho^{(k)}_{\mathrm{target}}
 =
 \rho^{(k)}_{E_{\mathrm{target}}}.  
@@ -444,7 +444,7 @@ $$
 
 最直接检验 ensemble typicality 的量是：
 
-# $$  
+$$  
 \Delta^{(k)}_{\mathrm{ET}}(s)
 
 = \frac12  
@@ -479,7 +479,7 @@ in the fixed-$k$ moment sense。
 
 如果我们直接比较 universal target，则定义：
 
-# $$  
+$$  
 \Delta^{(k)}_{\mathrm{target}}(s)
 
 = \frac12  
@@ -534,7 +534,7 @@ $$
 
 Equivalently,
 
-## $$  
+$$  
 \mathbb E_{\Psi_s\sim D}  
 \frac12  
 \left|  
@@ -555,7 +555,7 @@ This establishes ensemble typicality in the fixed-$k$ moment sense.
 **Theorem: finite-$k$ convergence to the universal target.**  
 For fixed $N_A$ and fixed $k$,
 
-## $$  
+$$  
 \mathbb E_{\Psi_s\sim D}  
 \frac12  
 \left|  
@@ -652,7 +652,7 @@ $$
 
 首先展开
 
-# $$  
+$$  
 \rho^{(k)}_{s,M_B}
 =
 \sum_{m_B}  
@@ -664,7 +664,7 @@ $$
 
 由于
 
-# $$  
+$$  
 |\psi_{s,m_B}\rangle
 
 \frac{  
@@ -691,7 +691,7 @@ $$
 
 对于 $k=1$，这个表达式是 linear 的：
 
-# $$  
+$$  
 p_s(m_B)  
 |\psi_{s,m_B}\rangle\langle\psi_{s,m_B}|
 
@@ -758,7 +758,7 @@ $$
 
 目标是得到：
 
-## $$  
+$$  
 \left|  
 \mathbb E_{\Psi_s\sim D}  
 \rho^{(k)}_{s,M_B}
@@ -783,7 +783,7 @@ $$
 
 然后证明 single instance 不仅平均上对，而且大多数 sample 都接近这个 average：
 
-## $$  
+$$  
 \mathbb E_{\Psi_s\sim D}  
 \left|  
 \rho^{(k)}_{s,M_B}
@@ -805,7 +805,7 @@ $$
 
 在实际证明中，常常先证明 Hilbert-Schmidt norm 的二阶矩 bound：
 
-## $$  
+$$  
 \mathbb E_{\Psi_s\sim D}  
 \left|  
 \rho^{(k)}_{s,M_B}
@@ -883,24 +883,24 @@ $$
 
 如果直接比较 target，可以使用 triangle inequality：
 
-## $$  
+$$  
 \begin{aligned}  
 &  
 \left|  
 \rho^{(k)}_{s,M_B}
-= \rho^{(k)}_{\mathrm{target}}  
+- \rho^{(k)}_{\mathrm{target}}  
 \right|_1  
-\le  
+&\le  
 \left|  
 \rho^{(k)}_{s,M_B}
 
-=\rho^{(k)}_{D,M_B}  
+- \rho^{(k)}_{D,M_B}  
 \right|_1  
 +  
 \left|  
 \rho^{(k)}_{D,M_B}
 
-\rho^{(k)}_{\mathrm{target}}  
+- \rho^{(k)}_{\mathrm{target}}  
 \right|_1.  
 \end{aligned}  
 $$
@@ -917,20 +917,21 @@ $$
 
 其中
 
-# $$  
+$$  
 \Delta^{(k)}_{\mathrm{ET}}(s)
 
 =\frac12  
 \left|  
 \rho^{(k)}_{s,M_B}
 
+- 
 \rho^{(k)}_{D,M_B}  
 \right|_1  
 $$
 
 是 ensemble typicality error，而
 
-# $$  
+$$  
 \Delta^{(k)}_{\mathrm{bias}}
 
 = \frac12  
@@ -1036,7 +1037,7 @@ $$
 **Theorem.**  
 Let $D$ be a global generator ensemble on $\mathcal H_A\otimes\mathcal H_B$, and let $M_B$ be a fixed projective measurement basis on $B$. For fixed subsystem dimension $D_A$ and fixed moment order $k$, suppose that
 
-## $$  
+$$  
 \mathbb E_{\Psi_s\sim D}  
 \frac12  
 \left|  
@@ -1050,7 +1051,7 @@ $$
 
 and
 
-## $$  
+$$  
 \frac12  
 \left|  
 \rho^{(k)}_{E(D,M_B)}
@@ -1071,7 +1072,7 @@ $$
 
 as $D_B\to\infty$. Then
 
-## $$  
+$$  
 \mathbb E_{\Psi_s\sim D}  
 \frac12  
 \left|  
@@ -1084,7 +1085,7 @@ $$
 
 Consequently, for any fixed $\eta>0$,
 
-## $$  
+$$  
 \Pr_{\Psi_s\sim D}  
 \left[  
 \frac12  
@@ -1119,7 +1120,7 @@ Thus, the projected ensemble generated from a typical global instance converges 
 
 最理想的是证明：
 
-## $$  
+$$  
 \mathbb E_s  
 \frac12  
 \left|  
@@ -1153,15 +1154,15 @@ $$
 
 > In this work, ensemble typicality is used as a structural assumption specifying the regime of applicability of the information-minimization principle. Operationally, we verify it in the finite-moment sense. For each fixed moment order $k$, we compare the $k$-th moment of the projected ensemble generated from a typical global instance with that of the ensemble-level projected ensemble:
 > 
-> # $$  
-\Delta^{(k)}_{\mathrm{ET}}(s)
- = \frac12  
- \left|  
-\rho^{(k)}_{E(|\Psi_s\rangle,M_B)}
- -
- \rho^{(k)}_{E(D,M_B)}  
- \right|_1.  
- $$
+> $$  
+> \Delta^{(k)}_{\mathrm{ET}}(s)
+> = \frac12  
+> \left|  
+> \rho^{(k)}_{E(|\Psi_s\rangle,M_B)}
+> -
+> \rho^{(k)}_{E(D,M_B)}  
+> \right|_1.  
+> $$
 > 
 > Ensemble typicality is established when
 > 
@@ -1175,12 +1176,13 @@ $$
 
 > When the ensemble-level projected ensemble is known or predicted to converge to a universal target $E_{\mathrm{target}}$, such as a GSE or GRSE determined by the meta ensemble, we verify the stronger combined statement
 > 
-> ## $$  
+> $$  
 > \mathbb E_s  
 > \frac12  
 > \left|  
 > \rho^{(k)}_{E(|\Psi_s\rangle,M_B)}
 > 
+> -
 > \rho^{(k)}_{E_{\mathrm{target}}}  
 > \right|_1  
 > \to 0.  
@@ -1218,7 +1220,7 @@ $$
 
 第一档验证的核心是：
 
-## $$  
+$$  
 \boxed{  
 \mathbb E_{\Psi_s\sim D}  
 \frac12  
@@ -1235,7 +1237,7 @@ $$
 
 如果 universal target 已知，则可以验证更强的 combined statement：
 
-## $$  
+$$  
 \boxed{  
 \mathbb E_{\Psi_s\sim D}  
 \frac12  
