@@ -43,8 +43,8 @@ $$
 
 # $$  
 E(|\Psi\rangle,M_B)
-
-{p_\Psi(m_B),|\psi_{\Psi,m_B}\rangle}_{m_B}.  
+=
+\{p_\Psi(m_B),|\psi_{\Psi,m_B}\rangle\}_{m_B}.  
 $$
 
 但是这里有一个重要区别：
@@ -54,8 +54,8 @@ $$
 
 # $$  
 E(D,M_B)
-
-{p_d p_d(m_B),|\psi_{d,m_B}\rangle}_{d,m_B}.  
+=
+\{p_d(m_B),|\psi_{d,m_B}\rangle\}_{d,m_B}.  
 $$
 
 - 在实验或 single-instance realization 中，我们通常只采样一个 global state $|\Psi_s\rangle\sim D$，然后研究它产生的 projected ensemble：
