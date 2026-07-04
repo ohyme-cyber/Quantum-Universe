@@ -888,15 +888,13 @@ $$
 &  
 \left|  
 \rho^{(k)}_{s,M_B}
-
-## \rho^{(k)}_{\mathrm{target}}  
+= \rho^{(k)}_{\mathrm{target}}  
 \right|_1  
-\  
-&\le  
+\le  
 \left|  
 \rho^{(k)}_{s,M_B}
 
-## \rho^{(k)}_{D,M_B}  
+=\rho^{(k)}_{D,M_B}  
 \right|_1  
 +  
 \left|  
@@ -922,7 +920,7 @@ $$
 # $$  
 \Delta^{(k)}_{\mathrm{ET}}(s)
 
-## \frac12  
+=\frac12  
 \left|  
 \rho^{(k)}_{s,M_B}
 
@@ -935,10 +933,10 @@ $$
 # $$  
 \Delta^{(k)}_{\mathrm{bias}}
 
-## \frac12  
+= \frac12  
 \left|  
 \rho^{(k)}_{D,M_B}
-
+-
 \rho^{(k)}_{\mathrm{target}}  
 \right|_1  
 $$
@@ -1156,15 +1154,14 @@ $$
 > In this work, ensemble typicality is used as a structural assumption specifying the regime of applicability of the information-minimization principle. Operationally, we verify it in the finite-moment sense. For each fixed moment order $k$, we compare the $k$-th moment of the projected ensemble generated from a typical global instance with that of the ensemble-level projected ensemble:
 > 
 > # $$  
-> \Delta^{(k)}_{\mathrm{ET}}(s)
-> 
-> ## \frac12  
-> \left|  
-> \rho^{(k)}_{E(|\Psi_s\rangle,M_B)}
-> 
-> \rho^{(k)}_{E(D,M_B)}  
-> \right|_1.  
-> $$
+\Delta^{(k)}_{\mathrm{ET}}(s)
+ = \frac12  
+ \left|  
+\rho^{(k)}_{E(|\Psi_s\rangle,M_B)}
+ -
+ \rho^{(k)}_{E(D,M_B)}  
+ \right|_1.  
+ $$
 > 
 > Ensemble typicality is established when
 > 
