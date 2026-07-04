@@ -55,7 +55,7 @@ $$
 # $$  
 E(D,M_B)
 =
-\{p_d(m_B),|\psi_{d,m_B}\rangle\}_{d,m_B}.  
+\{p_dp_d(m_B),|\psi_{d,m_B}\rangle\}_{d,m_B}.  
 $$
 
 - 在实验或 single-instance realization 中，我们通常只采样一个 global state $|\Psi_s\rangle\sim D$，然后研究它产生的 projected ensemble：
@@ -130,7 +130,7 @@ $$
 
 # $$  
 \rho_D
-
+=
 \sum_d p_d |\Psi_d\rangle\langle\Psi_d|  
 $$
 
@@ -153,15 +153,15 @@ $$
 
 # $$  
 \mathcal E_{\mathrm{Meta}}
-
-{p(m_B),\rho_A(m_B)}_{m_B},  
+=
+\{p(m_B),\rho_A(m_B)\}_{m_B},  
 $$
 
 其中
 
 # $$  
 p(m_B)
-
+=
 \mathrm{Tr}\left[  
 (I_A\otimes |m_B\rangle\langle m_B|)  
 \rho_D  
@@ -170,7 +170,7 @@ $$
 
 # $$  
 \rho_A(m_B)
-
+=
 \frac{  
 (I_A\otimes \langle m_B|)  
 \rho_D  
@@ -196,7 +196,7 @@ $$
 
 # $$  
 E_{\mathrm{GSE}}[\mathcal E_{\mathrm{Meta}}]
-
+=
 \sum_{m_B}  
 p(m_B)E_{\mathrm{Scr.}}[\rho_A(m_B)].  
 $$
@@ -290,7 +290,7 @@ $$
 
 # $$  
 \rho^{(k)}_E
-
+=
 \mathbb E_{\psi\sim E}  
 \left[  
 (|\psi\rangle\langle\psi|)^{\otimes k}  
@@ -305,7 +305,7 @@ $$
 
 # $$  
 E(|\Psi_s\rangle,M_B)
-
+\approx
 E(D,M_B)  
 $$
 
@@ -331,15 +331,15 @@ $$
 
 # $$  
 E(|\Psi_s\rangle,M_B)
-
-{p_s(m_B),|\psi_{s,m_B}\rangle}_{m_B}.  
+=
+\{p_s(m_B),|\psi_{s,m_B}\rangle\}_{m_B}.  
 $$
 
 其 $k$-th moment 定义为
 
 # $$  
 \rho^{(k)}_{s,M_B}
-
+=
 \sum_{m_B}  
 p_s(m_B)  
 \left(  
@@ -363,15 +363,15 @@ combined projected ensemble 是
 
 # $$  
 E(D,M_B)
-
-{p_d p_d(m_B),|\psi_{d,m_B}\rangle}_{d,m_B}.  
+=
+\{p_d p_d(m_B),|\psi_{d,m_B}\rangle\}_{d,m_B}.  
 $$
 
 其 $k$-th moment 为
 
 # $$  
 \rho^{(k)}_{D,M_B}
-
+=
 \mathbb E_{\Psi\sim D}  
 \left[  
 \sum_{m_B}  
@@ -387,7 +387,7 @@ $$
 
 # $$  
 \rho^{(k)}_{D,M_B}
-
+=
 \mathbb E_{\Psi\sim D}  
 \rho^{(k)}_{\Psi,M_B}.  
 $$
@@ -406,7 +406,7 @@ $$
 
 # $$  
 E_{\mathrm{target}}
-
+=
 E_{\mathrm{GSE}}[\mathcal E_{\mathrm{Meta}}],  
 $$
 
@@ -414,7 +414,7 @@ $$
 
 # $$  
 E_{\mathrm{target}}
-
+=
 E_{\mathrm{GRSE}}[\mathcal E_{\mathrm{Meta}}],  
 $$
 
@@ -422,7 +422,7 @@ $$
 
 # $$  
 \rho^{(k)}_{\mathrm{target}}
-
+=
 \rho^{(k)}_{E_{\mathrm{target}}}.  
 $$
 
@@ -447,10 +447,10 @@ $$
 # $$  
 \Delta^{(k)}_{\mathrm{ET}}(s)
 
-## \frac12  
+= \frac12  
 \left|  
 \rho^{(k)}_{s,M_B}
-
+-
 \rho^{(k)}_{D,M_B}  
 \right|_1.  
 $$
@@ -482,10 +482,10 @@ in the fixed-$k$ moment sense。
 # $$  
 \Delta^{(k)}_{\mathrm{target}}(s)
 
-## \frac12  
+= \frac12  
 \left|  
 \rho^{(k)}_{s,M_B}
-
+-
 \rho^{(k)}_{\mathrm{target}}  
 \right|_1.  
 $$
@@ -539,7 +539,7 @@ Equivalently,
 \frac12  
 \left|  
 \rho^{(k)}_{E(|\Psi_s\rangle,M_B)}
-
+-
 \rho^{(k)}_{E(D,M_B)}  
 \right|_1  
 \le  
@@ -560,7 +560,7 @@ For fixed $N_A$ and fixed $k$,
 \frac12  
 \left|  
 \rho^{(k)}_{E(|\Psi_s\rangle,M_B)}
-
+-
 \rho^{(k)}_{\mathrm{target}}  
 \right|_1  
 \le  
@@ -654,7 +654,7 @@ $$
 
 # $$  
 \rho^{(k)}_{s,M_B}
-
+=
 \sum_{m_B}  
 p_s(m_B)  
 \left(  
