@@ -45,9 +45,11 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Darkmode(),
     Component.RecentNotes({
       title: "Recently",
-      limit: 200,
+      limit: Number.MAX_SAFE_INTEGER,
       showTags: false, // 侧边栏保持干净
       filter: (page) =>
+        page.slug !== "index" &&
+        page.slug !== "" &&
         !page.slug?.startsWith("topic-relations/") &&
         !(page.frontmatter?.tags ?? []).includes("topic-relation"),
     }),
