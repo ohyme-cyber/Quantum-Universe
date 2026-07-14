@@ -1,24 +1,59 @@
+@use "../../styles/variables.scss" as *;
+
 .recent-notes {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+
   & > h3 {
+    flex: 0 0 auto;
     margin: 0.5rem 0 0 0;
     font-size: 1rem;
   }
 
   & > ul.recent-ul {
+    flex: 1 1 auto;
     list-style: none;
-    margin-top: 1rem;
+    min-height: 0;
+    margin-top: 0.55rem;
     padding-left: 0;
+    padding-right: 0.35rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
 
     & > li {
-      margin: 1rem 0;
+      margin: 0.36rem 0;
+
+      .section > .desc > h3 {
+        margin: 0;
+        font-size: 0.58rem;
+        line-height: 1.25;
+      }
+
       .section > .desc > h3 > a {
         background-color: transparent;
       }
 
       .section > .meta {
-        margin: 0 0 0.5rem 0;
+        margin: 0.08rem 0 0.16rem 0;
         opacity: 0.6;
+        font-size: 0.52rem;
+        line-height: 1.2;
       }
+    }
+  }
+
+  @media all and ($mobile) {
+    flex: initial;
+    max-height: none;
+    overflow: visible;
+
+    & > ul.recent-ul {
+      max-height: none;
+      overflow: visible;
     }
   }
 }
