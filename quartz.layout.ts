@@ -28,7 +28,12 @@ export const sharedPageComponents: SharedLayout = {
     },
   }),
   // 全局组件放在这里没问题，因为我们已经在组件内部写了“非主页即消失”的逻辑
-  afterBody: [Component.GlobalTags(), Component.TopicGraph(), Component.TopicRelationIndex()],
+  afterBody: [
+    Component.SitePasswordGate(),
+    Component.GlobalTags(),
+    Component.TopicGraph(),
+    Component.TopicRelationIndex(),
+  ],
 }
 
 export const defaultContentPageLayout: PageLayout = {

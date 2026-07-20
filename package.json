@@ -16,6 +16,7 @@
     "docs": "npx quartz build --serve -d docs",
     "check": "tsc --noEmit && npx prettier . --check",
     "format": "npx prettier . --write",
+    "site-password-hash": "node scripts/generate-site-password-hash.mjs",
     "test": "tsx --test",
     "profile": "0x -D prof ./quartz/bootstrap-cli.mjs build --concurrency=1"
   },

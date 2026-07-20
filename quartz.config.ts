@@ -1,6 +1,8 @@
 import { QuartzConfig } from "./quartz/cfg"
 import * as Plugin from "./quartz/plugins"
 
+const sitePasswordGateEnabled = Boolean(process.env.QUARTZ_SITE_PASSWORD_HASH?.trim())
+
 /**
  * Quartz 4 Configuration
  *
@@ -81,8 +83,8 @@ const config: QuartzConfig = {
       Plugin.FolderPage(),
       Plugin.TagPage(),
       Plugin.ContentIndex({
-        enableSiteMap: true,
-        enableRSS: true,
+        enableSiteMap: !sitePasswordGateEnabled,
+        enableRSS: !sitePasswordGateEnabled,
       }),
       Plugin.Assets(),
       Plugin.Static(),
