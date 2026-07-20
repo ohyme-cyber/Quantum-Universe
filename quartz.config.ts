@@ -1,7 +1,6 @@
 import { QuartzConfig } from "./quartz/cfg"
 import * as Plugin from "./quartz/plugins"
-
-const sitePasswordGateEnabled = Boolean(process.env.QUARTZ_SITE_PASSWORD_HASH?.trim())
+import { sitePasswordGateEnabled } from "./quartz/sitePassword"
 
 /**
  * Quartz 4 Configuration

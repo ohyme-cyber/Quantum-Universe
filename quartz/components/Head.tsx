@@ -5,8 +5,7 @@ import { googleFontHref, googleFontSubsetHref } from "../util/theme"
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { unescapeHTML } from "../util/escape"
 import { CustomOgImagesEmitterName } from "../plugins/emitters/ogImage"
-
-const sitePasswordGateEnabled = Boolean(process.env.QUARTZ_SITE_PASSWORD_HASH?.trim())
+import { sitePasswordGateEnabled } from "../sitePassword"
 
 export default (() => {
   const Head: QuartzComponent = ({

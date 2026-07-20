@@ -1,5 +1,6 @@
 import { QuartzComponent, QuartzComponentConstructor } from "./types"
 import styles from "./styles/sitePasswordGate.scss"
+import { configuredSitePasswordHash } from "../sitePassword"
 
 type SitePasswordGateOptions = {
   passwordHash?: string
@@ -35,9 +36,7 @@ function clientConfig(options?: SitePasswordGateOptions): SitePasswordGateConfig
   const idleMinutes = options?.idleMinutes ?? readMinutes(process.env.QUARTZ_SITE_IDLE_MINUTES, 60)
 
   return {
-    passwordHash: normalizePasswordHash(
-      options?.passwordHash ?? process.env.QUARTZ_SITE_PASSWORD_HASH,
-    ),
+    passwordHash: normalizePasswordHash(options?.passwordHash ?? configuredSitePasswordHash),
     sessionMs: Math.round(sessionMinutes * 60 * 1000),
     idleMs: Math.round(idleMinutes * 60 * 1000),
     storageKey: options?.storageKey ?? "quartz-site-auth-v1",
